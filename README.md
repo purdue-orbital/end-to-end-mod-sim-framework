@@ -15,7 +15,7 @@ MASTRAB (Modeling and Simulation of Trajectories for Rocket and Balloon)
 * All new code should have associated unit tests
 
 # Phases
-* phase 1 represents the mission phase beginning from the ground and ending with the rocket launch
+* phase 1 represents the mission phase beginning from the ground and ending with the launch platform and rocket being GO for launch
 * phase 2 represents the mission phase beginning with the rocket launch and ending with orbit insertion
 * phase 3 represents the mission phase beginning with orbit insertion and ending with orbit decay and deorbit
 
