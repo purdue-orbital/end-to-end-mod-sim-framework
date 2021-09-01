@@ -7,6 +7,11 @@ This Python modeling and simulation framework will integrate a variety of intern
 * external_libraries/ contains all external libraries and dependencies not obtainable through pip install or useful random functions
 * .gitignore specifies all documents and folders that will not be version controlled or tracked by git
 
+# Rules
+* Always develop new code on a development branch, *NOT MAIN*
+* Always create a Pull Request to merge your code into main
+* All new code should have associated unit tests
+
 # Phases
 * phase 1 represents the mission phase beginning from the ground and ending with the rocket launch
 * phase 2 represents the mission phase beginning with the rocket launch and ending with orbit insertion
