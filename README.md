@@ -1,5 +1,7 @@
-# end-to-end-mod-sim-framework
+# end-to-end-mod-sim-framework (MASTRAB)
 This Python modeling and simulation framework will integrate a variety of internal and external toolsets to target and model ephemeris and vehicle dynamics from balloon ground launch to orbital re-entry.
+
+MASTRAB (Modeling and Simulation of Trajectories for Rocket and Balloon)
 
 # Repo Structure
 * src/ contains all actual python code and data sources for models
