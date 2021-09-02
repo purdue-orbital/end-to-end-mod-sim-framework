@@ -3,10 +3,10 @@ import datetime as t
 
 def user_input():
     gui = 'initialize'
-    gui = raw_input('Would you like to use the GUI (Yes/No): ')
+    gui = input('Would you like to use the GUI (Yes/No): ')
     while gui not in ['Yes', 'No']:
         print('\nIncorrect input, expected "Yes" or "No"\n')
-        gui = raw_input('Would you like to use the GUI (Yes/No): ')
+        gui = input('Would you like to use the GUI (Yes/No): ')
     if gui == 'Yes':
         input_data = user_input_gui()
     elif gui == 'No':
@@ -19,14 +19,16 @@ def user_input():
 def user_input_gui():
     pass
     # TODO: develop a GUI interface for MASTRAB (lmao terrible name)
+    inputs = None
     return inputs
 
 
 def user_input_terminal():
     # Fake Date to test inputs
     inputs = InputStructure()
-    inputs.launch_date = t.datetime(2025, 06, 21, 7)
+    inputs.launch_date = t.datetime(2025, 6, 21, 7)
     inputs.mode = 1
+    inputs.weather_model = 'historical'
     return inputs
 
 
