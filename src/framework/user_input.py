@@ -1,9 +1,10 @@
 import datetime as t
+from dataclasses import dataclass
 
 
 def user_input():
     gui = 'initialize'
-    gui = input('Would you like to use the GUI (Yes/No): ')
+    gui = input('\n\nWould you like to use the GUI (Yes/No): ')
     while gui not in ['Yes', 'No']:
         print('\nIncorrect input, expected "Yes" or "No"\n')
         gui = input('Would you like to use the GUI (Yes/No): ')
@@ -19,19 +20,19 @@ def user_input():
 def user_input_gui():
     pass
     # TODO: develop a GUI interface for MASTRAB (lmao terrible name)
-    inputs = None
+    inputs = 1
     return inputs
 
 
 def user_input_terminal():
-    # Fake Date to test inputs
-    inputs = InputStructure()
-    inputs.launch_date = t.datetime(2025, 6, 21, 7)
-    inputs.mode = 1
-    inputs.weather_model = 'historical'
+    # Fake Data to test inputs
+    inputs = InputStructure(25000.0, t.datetime(2025, 6, 21, 7), 1, 'historical')
     return inputs
 
 
+@dataclass
 class InputStructure:
-    def __init__(self):
-        self.launch_alt = 20000
+    launch_alt: float
+    launch_date: t.datetime
+    mode: int
+    weather_model: str
