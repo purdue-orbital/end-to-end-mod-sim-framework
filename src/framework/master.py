@@ -83,10 +83,11 @@ class EphemerisDataStruct:
     which can be easily compared, fetched, output, and passed between functions/files
     
     """
-    launch_alt: float
-    launch_date: t.datetime
-    mode: int
-    weather_model: str
+    current_time: t.datetime
+    current_ref_frame: str
+    current_position: list[float]
+    current_velocity: list[float]
+    current_attitude: list[float]
 
 
 if "__main__":
