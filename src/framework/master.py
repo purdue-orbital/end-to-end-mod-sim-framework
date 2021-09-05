@@ -1,5 +1,6 @@
 # Import standard external libraries and imports
 import numpy as np
+import pyquaternion as quat 
 from dataclasses import dataclass
 import datetime as t
 
@@ -94,7 +95,7 @@ class EphemerisDataStruct:
     current_time: t.datetime
     current_ref_frame: str
     current_position_and_velocity: list[float]
-    current_attitude: list[float]
+    current_attitude: quat.Quaternion
 
 
 if "__main__":
