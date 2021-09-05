@@ -48,7 +48,7 @@ def single_run_rocket_ascent_trajectory():
     return outputs
 
 
-def single_run_orbit_propogation():
+def single_run_orbit_propagation():
     """
     Description: Function to call and execute a single run of the 6DOF balloon model
 
@@ -70,11 +70,19 @@ def single_run_orbit_propogation():
 
 def dispersion_analysis():
     
-    # TODO: develop logic to run a set of models in sequence, varying relevant parameters
+    # TODO: develop logic to run a set of models in sequence, randomly varying all relevant parameters
 
     outputs = 1
     return outputs
 
+
+def trade_study_XXX():
+    
+    # TODO: develop logic to run a set of models in sequence, varying only targeted parameters to investigate effects
+    # create multiple functions to consider multiple trade study options
+
+    outputs = 1
+    return outputs
 
 @dataclass
 class EphemerisDataStruct:
@@ -85,8 +93,7 @@ class EphemerisDataStruct:
     """
     current_time: t.datetime
     current_ref_frame: str
-    current_position: list[float]
-    current_velocity: list[float]
+    current_position_and_velocity: list[float]
     current_attitude: list[float]
 
 

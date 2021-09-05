@@ -26,13 +26,25 @@ def user_input_gui():
 
 def user_input_terminal():
     # Fake Data to test inputs
-    inputs = InputStructure(25000.0, t.datetime(2025, 6, 21, 7), 1, 'historical')
+    inputs = InputStructure(25000.0, [47, 56], t.datetime(2025, 6, 21, 7), 1, 'historical')
     return inputs
 
 
 @dataclass
 class InputStructure:
+
     launch_alt: float
+    launch_location_lla: list[float]
     launch_date: t.datetime
     mode: int
     weather_model: str
+
+    def lla_to_cartesian(launch_location_lla):
+        
+        #todo: logic to convert from lla to cartesian
+
+        launch_location_cart = launch_location_lla
+
+        return launch_location_cart
+    
+    launch_location_cart = lla_to_cartesian(launch_location_lla)
