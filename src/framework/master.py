@@ -8,7 +8,7 @@ import datetime as t
 import user_input
 
 
-def single_run_launch_platform_6dof(weather_model):
+def single_run_launch_platform_6dof(inputs):
     """
     Description: Function to call and execute a single run of the 6DOF balloon model
 
@@ -21,12 +21,20 @@ def single_run_launch_platform_6dof(weather_model):
     Raises:
     - None yet
     """
+    current_model = 'Balloon Drift'
     
     # TODO: develop a 6dof model for launch platform ascent
-
-    run_result = 1
+    
     drift_altitude = 25000
-    return run_result, drift_altitude
+    final_pos_vel = [0, 0, drift_altitude, 0, 0, 0]
+    final_orient = [0, 0, 0, 0]
+    run_result = 'Success'
+
+    balloon_data_out = EphemerisDataStruct(inputs.launch_date, final_pos_vel, final_orient, current_model, run_result)
+    balloon_ref_frame = balloon_data_out.referenceFrame('inertial', 'balloon fixed')
+    balloon_data_out.current_position_and_velocity = balloon_ref_frame.inertial_to_balloon_body()
+
+    return balloon_data_out
 
 
 def single_run_rocket_ascent_trajectory():
@@ -93,9 +101,30 @@ class EphemerisDataStruct:
     
     """
     current_time: t.datetime
-    current_ref_frame: str
     current_position_and_velocity: list[float]
     current_attitude: quat.Quaternion
+    current_model: str
+    model_run_status: str
+
+    def __post_init__(self):
+        self.refFrame = referenceFrame()
+
+@dataclass
+class referenceFrame:
+    """ 
+    Establishes a standardized data structure class to create common reference frame
+    as a subclass of EphemerisDataStruct which can be easily compared, fetched, output,
+    and passed between functions/files
+    
+    """
+    current_frame: str
+    desired_frame: str
+
+    def inertial_to_balloon_body(self):
+        # TODO - develop rotation matrices
+        new_position_and_velocity = self.current_position_and_velocity
+        return new_position_and_velocity
+
 
 
 if "__main__":
@@ -107,9 +136,9 @@ if "__main__":
     """
     inputs = user_input.user_input()
     if inputs.mode == 1:
-        run_status, drift_altitude = single_run_launch_platform_6dof(inputs.weather_model)
-        if run_status == -1:
+        run_status, drift_altitude = single_run_launch_platform_6dof(inputs)
+        if run_status == 'Failed':
             print('Run failed!')
-        elif run_status == 1:
+        elif run_status == 'Success':
             print('\nRun succeeded!')
             print("\nBalloon drifted to an altitude of {} km".format(drift_altitude))
