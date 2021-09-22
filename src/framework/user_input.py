@@ -1,5 +1,6 @@
 import datetime as t
 from dataclasses import dataclass
+import typing as ty
 
 
 def user_input():
@@ -34,7 +35,7 @@ def user_input_terminal():
 class InputStructure:
 
     launch_alt: float
-    launch_location_lla: list[float]
+    launch_location_lla: ty.List[float]
     launch_date: t.datetime
     mode: int
     weather_model: str
