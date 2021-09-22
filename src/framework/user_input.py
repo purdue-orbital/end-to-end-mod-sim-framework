@@ -1,5 +1,6 @@
 import datetime as t
 from dataclasses import dataclass
+import typing as ty
 
 
 def user_input():
@@ -34,17 +35,15 @@ def user_input_terminal():
 class InputStructure:
 
     launch_alt: float
-    launch_location_lla: list[float]
+    launch_location_lla: ty.List[float]
     launch_date: t.datetime
     mode: int
     weather_model: str
 
-    def lla_to_cartesian(launch_location_lla):
+    def lla_to_cartesian(self):
         
         #todo: logic to convert from lla to cartesian
 
-        launch_location_cart = launch_location_lla
+        launch_location_cart = self.launch_location_lla
 
         return launch_location_cart
-    
-    launch_location_cart = lla_to_cartesian(launch_location_lla)

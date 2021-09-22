@@ -3,12 +3,13 @@ import numpy as np
 import pyquaternion as quat 
 from dataclasses import dataclass
 import datetime as t
+import typing as ty
 
 # Import external files and functions
 import user_input
 
 
-def single_run_launch_platform_6dof(weather_model):
+def single_run_launch_platform_6dof(inputs):
     """
     Description: Function to call and execute a single run of the 6DOF balloon model
 
@@ -21,12 +22,20 @@ def single_run_launch_platform_6dof(weather_model):
     Raises:
     - None yet
     """
+    current_model = 'Balloon Drift'
+    drift_altitude = 25000
     
     # TODO: develop a 6dof model for launch platform ascent
+    
+    initial_pos_vel = [0, 0, 0, 0, 0, 0]
 
-    run_result = 1
-    drift_altitude = 25000
-    return run_result, drift_altitude
+    data = EphemerisDataStruct(inputs.launch_date, initial_pos_vel)
+    data.refFrame = referenceFrame('inertial', 'balloon body')
+    data.current_pos_vel = data.refFrame.inertial_to_balloon_body(data)
+    
+    data.model_run_status = 'Success'
+
+    return data
 
 
 def single_run_rocket_ascent_trajectory():
@@ -90,12 +99,28 @@ class EphemerisDataStruct:
     """ 
     Establishes a standardized data structure class to create common data object instances
     which can be easily compared, fetched, output, and passed between functions/files
-    
     """
-    current_time: t.datetime
-    current_ref_frame: str
-    current_position_and_velocity: list[float]
-    current_attitude: quat.Quaternion
+    current_time: ty.Optional[t.datetime] = None
+    current_pos_vel: ty.Optional[np.array] = None
+    current_attitude: ty.Optional[quat.Quaternion] = None
+    current_model: ty.Optional[str] = None
+    model_run_status: ty.Optional[str] = None
+    refFrame: ty.Optional[object] = None
+
+@dataclass
+class referenceFrame:
+    """ 
+    Establishes a standardized data structure class to create common reference frame
+    as a subclass of EphemerisDataStruct which can be easily compared, fetched, output,
+    and passed between functions/files
+    """
+    current_frame: ty.Optional[str] = None
+    desired_frame: ty.Optional[str] = None
+
+    def inertial_to_balloon_body(self, object):
+        # TODO - develop rotation matrices
+        new_pos_vel = object.current_pos_vel + np.array([1, 0, 1, 0, 0, 1])
+        return new_pos_vel
 
 
 if "__main__":
@@ -103,13 +128,12 @@ if "__main__":
     Primary code that runs when master.py is ran    
 
     All high-level framework logic and flow should be defined here
-
     """
     inputs = user_input.user_input()
     if inputs.mode == 1:
-        run_status, drift_altitude = single_run_launch_platform_6dof(inputs.weather_model)
-        if run_status == -1:
+        balloon_data = single_run_launch_platform_6dof(inputs)
+        if balloon_data.model_run_status == 'Failed':
             print('Run failed!')
-        elif run_status == 1:
+        elif balloon_data.model_run_status == 'Success':
             print('\nRun succeeded!')
-            print("\nBalloon drifted to an altitude of {} km".format(drift_altitude))
+            print("\nBalloon position and velocity vector is {}".format(balloon_data.current_pos_vel))
