@@ -6,7 +6,12 @@ import datetime as t
 import typing as ty
 
 # Import external files and functions
+import sys
+sys.path.append('../phase1/models/')
+sys.path.append('../phase2/models/')
+sys.path.append('../phase3/models/')
 import user_input
+import balloon_drift_V1
 
 
 def single_run_launch_platform_6dof(inputs):
@@ -32,6 +37,10 @@ def single_run_launch_platform_6dof(inputs):
     data = EphemerisDataStruct(inputs.launch_date, initial_pos_vel)
     data.refFrame = referenceFrame('inertial', 'balloon body')
     data.current_pos_vel = data.refFrame.inertial_to_balloon_body(data)
+
+    integration_obj = balloon_drift_V1.balloon_model_V1()
+    data.current_pos_vel = integration_obj.y
+    data.current_time = integration_obj.t
     
     data.model_run_status = 'Success'
 
@@ -135,5 +144,11 @@ if "__main__":
         if balloon_data.model_run_status == 'Failed':
             print('Run failed!')
         elif balloon_data.model_run_status == 'Success':
-            print('\nRun succeeded!')
-            print("\nBalloon position and velocity vector is {}".format(balloon_data.current_pos_vel))
+            print("\nRun succeeded!")
+            print("\nAt time {} mins balloon is:".format(balloon_data.current_time/60))
+            print("x-position = {} km".format(balloon_data.current_pos_vel[0]/1000))
+            print("y-position = {} km".format(balloon_data.current_pos_vel[1]/1000))
+            print("z-position = {} km".format(balloon_data.current_pos_vel[2]/1000))
+            print("x-velocity = {} m/s".format(balloon_data.current_pos_vel[3]))
+            print("y-velocity = {} m/s".format(balloon_data.current_pos_vel[4]))
+            print("z-velocity = {} m/s".format(balloon_data.current_pos_vel[5]))
