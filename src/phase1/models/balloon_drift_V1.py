@@ -30,9 +30,9 @@ def balloon_EOM(t, vars):
     vars_dot[0] = vars[3]
     vars_dot[1] = vars[4]
     vars_dot[2] = vars[5]
-    vars_dot[3] = rand.uniform(-0.02, 0.03)
+    vars_dot[3] = rand.uniform(-0.01, 0.025)
     vars_dot[4] = rand.uniform(-0.01, 0.02)
-    vars_dot[5] = 0.01
+    vars_dot[5] = rand.uniform(-0.01, 0.03)
     
     return vars_dot
 
@@ -57,7 +57,8 @@ def balloon_model_V1(inputs):
     #TODO: develop a method to convert lla to cartesian and establish reference frames
     # First 3 values: x, y, z [meters]
     # Second 3 values: vx, vy, vz [m/s]
-    balloon_data.pos_vel = [0, 0, 0, 0, 0, 0]
+    balloon_data.pos_vel = inputs.launch_location_cart
+    balloon_data.pos_vel = np.append(balloon_data.pos_vel, [0, 0, 0])
     balloon_data.time = 0
 
     dat = balloon_data
