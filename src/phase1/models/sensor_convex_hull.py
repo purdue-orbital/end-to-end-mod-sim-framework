@@ -1,6 +1,10 @@
 # program to find convex hull of a set of points using Jarvis' Algorithm.
-
+#
 # input: "points[]"
+# the input of points[] is an array of class points "Point"
+# hence, points[0].x corresponds to the first x-coordinate
+# and points[0].y corresponds to the first y-cooridnate
+#
 # output: "sensor_hull.pattern"
 
 # the smallest value on the x-axis is referred to as "leftmost"
