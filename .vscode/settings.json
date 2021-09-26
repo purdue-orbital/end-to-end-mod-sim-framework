@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./src/phase1/models",
+        "./src/framework"
+    ]
+}

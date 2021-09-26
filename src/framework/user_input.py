@@ -27,7 +27,7 @@ def user_input_gui():
 
 def user_input_terminal():
     # Fake Data to test inputs
-    inputs = InputStructure(25000.0, [47, 56], t.datetime(2025, 6, 21, 7), 1, 'historical')
+    inputs = InputStructure(25000.0, [47, 56], t.datetime(2025, 6, 21, 7), 3600, 1, 'historical')
     return inputs
 
 
@@ -36,7 +36,8 @@ class InputStructure:
 
     launch_alt: float
     launch_location_lla: ty.List[float]
-    launch_date: t.datetime
+    launch_date: int
+    launch_duration: int
     mode: int
     weather_model: str
 
