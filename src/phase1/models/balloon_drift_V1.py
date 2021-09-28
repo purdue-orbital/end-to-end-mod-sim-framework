@@ -6,6 +6,7 @@ import datetime as t
 import random as rand
 import scipy.integrate as integrate
 import typing as ty
+from balloonEphemerisWriter import balloonEphemerisWriter
 
 
 def balloon_force_models():
@@ -71,6 +72,8 @@ def balloon_model_V1(inputs):
         dat.time = np.append(dat.time, integration_obj.t)
 
     dat.pos_vel = dat.pos_vel.reshape((int(len(dat.pos_vel)/6), 6))
+
+    balloonEphemerisWriter('6 Aug 2021 23:59:42.000000', (dat.pos_vel)/1000.0, dat.time, 'balloon')
 
     return dat
 

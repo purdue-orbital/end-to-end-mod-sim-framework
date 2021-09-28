@@ -12,7 +12,6 @@ sys.path.append('../phase2/models/')
 sys.path.append('../phase3/models/')
 import user_input
 from balloon_drift_V1 import balloon_model_V1
-from balloonEphemerisWriter import balloonEphemerisWriter
 
 
 def single_run_launch_platform_6dof(inputs):
@@ -45,8 +44,6 @@ def single_run_launch_platform_6dof(inputs):
     transition_data.current_time = balloon_data_out.time[-1]
     
     transition_data.model_run_status = 'Success'
-
-    balloonEphemerisWriter('6 Aug 2021 23:59:42.000000', balloon_data_out.pos_vel, balloon_data_out.time, 'balloon')
 
     return transition_data, balloon_data_out
 

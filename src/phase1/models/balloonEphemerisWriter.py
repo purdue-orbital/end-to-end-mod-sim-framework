@@ -7,7 +7,7 @@ def balloonEphemerisWriter(propStartDate, ephemStates, ephemTimes, fname):
     # WrittenBy    STK_v12.2.0
     
     BEGIN Ephemeris
-        NumberOfEphemerisPoints		 193
+        NumberOfEphemerisPoints		 {len(ephemTimes)}
         ScenarioEpoch		 {propStartDate}
         InterpolationMethod		 Lagrange
         InterpolationSamplesM1		 7
@@ -16,7 +16,7 @@ def balloonEphemerisWriter(propStartDate, ephemStates, ephemTimes, fname):
     
         EphemerisTimePosVel	"""
 
-    with open(f"{fname}.e", "w") as f:
+    with open(f"../phase1/models/{fname}.e", "w") as f:
         f.write(ephemHeader)
         f.write("\n")
         for i, point in enumerate(ephemStates):
