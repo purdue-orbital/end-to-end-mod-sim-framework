@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-def balloonEphemerisWriter(propStartDate, ephemStates, ephemTimes, fname): 
+def balloonEphemerisWriter(propStartDate, ephemStates, ephemTimes, fname, stk_frame): 
     #Takes in UTCG propagation start date, ephemeris states, ephemeris time, and filename for output
-    ephemHeader = f"""stk.v.12.0
+    ephemHeader = f"""stk.v.11.0
     
-    # WrittenBy    STK_v12.2.0
+    # WrittenBy    STK_v11.4.0
     
     BEGIN Ephemeris
         NumberOfEphemerisPoints		 {len(ephemTimes)}
@@ -12,7 +12,7 @@ def balloonEphemerisWriter(propStartDate, ephemStates, ephemTimes, fname):
         InterpolationMethod		 Lagrange
         InterpolationSamplesM1		 7
         CentralBody		 Earth
-        CoordinateSystem		 ICRF
+        CoordinateSystem		 {stk_frame}
     
         EphemerisTimePosVel	"""
 
