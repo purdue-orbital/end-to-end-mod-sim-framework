@@ -14,7 +14,7 @@ import user_input
 from balloon_drift_V1 import balloon_model_V1
 
 
-def single_run_launch_platform_6dof(inputs):
+def single_run_launch_platform_3dof(inputs):
     """
     Description: Function to call and execute a single run of the 6DOF balloon model
 
@@ -27,24 +27,24 @@ def single_run_launch_platform_6dof(inputs):
     Raises:
     - None yet
     """
-    current_model = 'Balloon Drift'
-    drift_altitude = 25000
     
-    # TODO: develop a 3dof model for launch platform ascent
+    # Create a data structure to contain data to be passed between models
+    transition_data = FinalStateDataStruct(inputs.launch_date, inputs.launch_init_state)
     
-    initial_pos_vel = [0, 0, 0, 0, 0, 0]
+    # Assign a reference frame to the transition data structure
+    transition_data.refFrame = referenceFrame('inertial', 'balloon body') 
 
-    transition_data = FinalStateDataStruct(inputs.launch_date, initial_pos_vel)
-    transition_data.refFrame = referenceFrame('inertial', 'balloon body')
-    transition_data.current_pos_vel = transition_data.refFrame.inertial_to_balloon_body(transition_data)
-
+    # Pass the inputs to the balloon model code (function is in phase1/models)
     balloon_data_out = balloon_model_V1(inputs)
     
+    # Set the final time step values from balloon model as the "current state"
     transition_data.current_pos_vel = balloon_data_out.pos_vel[-1][0:6]
     transition_data.current_time = balloon_data_out.time[-1]
     
+    # If we make it to this point, seems like model ran successfully
     transition_data.model_run_status = 'Success'
 
+    # return transitionary data structure as well as full balloon ephemeris
     return transition_data, balloon_data_out
 
 
@@ -141,10 +141,14 @@ if "__main__":
     All high-level framework logic and flow should be defined here
     """
     inputs = user_input.user_input()
+    # If user specifies mode = 1, they want a single run of balloon 3DoF model
     if inputs.mode == 1:
-        final_balloon_data, balloon_ephemeris = single_run_launch_platform_6dof(inputs)
+        # Assign the returned data from function to data structs
+        final_balloon_data, balloon_ephemeris = single_run_launch_platform_3dof(inputs)
+        # If run failed, alert user
         if final_balloon_data.model_run_status == 'Failed':
             print('Run failed!')
+        # If run was successful, provide relevant information to user
         elif final_balloon_data.model_run_status == 'Success':
             print("\nRun succeeded!")
             print("\nAt time {} mins balloon is:".format(final_balloon_data.current_time/60))
