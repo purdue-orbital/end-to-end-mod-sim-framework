@@ -39,11 +39,19 @@ def user_input_terminal():
     # Fake Data to test inputs
     inputs = InputStructure(25000.0, cape_cart_m, 'Cartesian', t.datetime(2025, 6, 21, 7), 3600, 1, 'historical')
 
+    # If inputs are Cartesian then directly translate
     if inputs.launch_location_type == 'Cartesian':
         inputs.launch_location_cart = inputs.launch_location_lla
 
+    # If inputs are Lat-Long-Alt then use the coordinate transition method
     if inputs.launch_location_type == 'Lat-Long-Alt':
         inputs.launch_location_cart = inputs.lla_to_cartesian()
+    
+    # Set initial velocity to assume zero in all directions
+    init_vel = [0, 0, 0]
+
+    # append position and velocity vectors to create initial state vector
+    inputs.launch_init_state = inputs.launch_location_cart + init_vel
 
     return inputs
 
@@ -59,6 +67,7 @@ class InputStructure:
     mode: int
     weather_model: str
     launch_location_cart: ty.Optional[ty.List[float]] = None
+    launch_init_state: ty.Optional[ty.List[float]] = None
 
     def lla_to_cartesian(self):     
         latitude, longitude = np.deg2rad(self.launch_location_lla[0:2])
