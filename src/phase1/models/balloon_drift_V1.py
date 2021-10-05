@@ -81,7 +81,7 @@ def balloon_model_V1(inputs):
     dat.pos_vel = dat.pos_vel.reshape((int(len(dat.pos_vel)/6), 6))
 
     # Finally, send the full ephemeris data to function to create a balloon.e file for STK visualization
-    balloonEphemerisWriter('6 Aug 2021 23:59:42.000000', dat.pos_vel, dat.time, 'balloon','Fixed')
+    balloonEphemerisWriter(inputs.launch_date, dat.pos_vel, dat.time, 'balloon','Fixed')
 
     # Return data object structure for reference in main code
     return dat

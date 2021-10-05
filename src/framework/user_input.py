@@ -29,6 +29,9 @@ def user_input_gui():
 
 def user_input_terminal():
     
+    # Initial time
+    init_time = '6 Aug 2021 23:59:42.000000'
+
     # Lat/Long/Alt of Cape Canaveral
     cape_lla_deg = [28.3922, -80.6077, 0]
 
@@ -37,7 +40,7 @@ def user_input_terminal():
     cape_cart_m = [i * 1000 for i in cape_cart_km]
 
     # Fake Data to test inputs
-    inputs = InputStructure(25000.0, cape_cart_m, 'Cartesian', t.datetime(2025, 6, 21, 7), 3600, 1, 'historical')
+    inputs = InputStructure(25000.0, cape_cart_m, 'Cartesian', init_time, 3600, 1, 'historical')
 
     # If inputs are Cartesian then directly translate
     if inputs.launch_location_type == 'Cartesian':
@@ -62,7 +65,7 @@ class InputStructure:
     launch_alt: float
     launch_location_lla: ty.List[float]
     launch_location_type: str
-    launch_date: int
+    launch_date: str
     launch_duration: int
     mode: int
     weather_model: str
