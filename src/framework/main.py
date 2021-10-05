@@ -30,9 +30,6 @@ def single_run_launch_platform_3dof(inputs):
     
     # Create a data structure to contain data to be passed between models
     transition_data = FinalStateDataStruct(inputs.launch_date, inputs.launch_init_state)
-    
-    # Assign a reference frame to the transition data structure
-    transition_data.refFrame = referenceFrame('inertial', 'balloon body') 
 
     # Pass the inputs to the balloon model code (function is in phase1/models)
     balloon_data_out = balloon_model_V1(inputs)
