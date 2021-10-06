@@ -3,6 +3,7 @@ import numpy as np
 import pyquaternion as quat 
 from dataclasses import dataclass
 import datetime as t
+import typing as ty
 
 # Import external files and functions
 import user_input
@@ -94,7 +95,7 @@ class EphemerisDataStruct:
     """
     current_time: t.datetime
     current_ref_frame: str
-    current_position_and_velocity: list[float]
+    current_position_and_velocity: ty.List[float]
     current_attitude: quat.Quaternion
 
 
