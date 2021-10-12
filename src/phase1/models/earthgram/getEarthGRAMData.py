@@ -1,4 +1,4 @@
-def writeTrajFile(BALLOON,CONE):
+def getEarthGRAMData(BALLOON,CONE1):
     """-----------------------------------------------------------------------------------------
     CONE_OUT = writeTrajFile(T,V,CONE)
     Function to write txt file with atmosphere cone to input to EarthGRAM
@@ -26,13 +26,18 @@ def writeTrajFile(BALLOON,CONE):
             .P      - pressure (N/m^2)
     -----------------------------------------------------------------------------------------"""
 
-    elapsed_time = []       # elapsed seconds since initial balloon state based on altitude and vz
+    elapsed_time = []       # elapsed seconds since initial balloon state based on current altitude and vz
 
-    for x in CONE.ALT:
+    for x in CONE1.ALT:
         elapsed_time.append((x - BALLOON.ALT)*1000/BALLOON.VZ)
     
-    with open('cone_file.txt','w') as f:  # open text file
-        f.writelines('')
+    with open('cone_file.txt','w') as f:    # open text file
+        f.writelines('')                    # clear file content
+        for i in range(len(CONE1.ALT)):     # write trajectory file in format accepted by EarthGRAM
+            f.write("{}\t{}\t{}\t{}\n".format(elapsed_time[i],CONE1.ALT[i],CONE1.LAT[i],CONE1.LONG[i]))
 
-    for i in range(len(CONE.LAT)):
-        f.write("{}\t{}\t{}\t{}".format(elapsed_time(i),CONE.ALT(i),CONE.LAT(i),CONE.LONG(i)))
+    """Placeholder to call EarthGRAM.exe to run trajectory file. Note, the "Input file" passed to Earth gram will be preset in the git repo
+    and will not need to be edited between simulations. Only the Trajectory file gets updated, which is automated through the use of this 
+    function."""
+
+    
