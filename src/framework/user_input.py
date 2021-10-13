@@ -32,6 +32,9 @@ def user_input_terminal():
     # Initial time
     init_time = '6 Aug 2021 23:59:42.000000'
 
+    # Constant values [mass [kg], coefficient of drag, cross-sectional balloon area [m^2]]
+    constants = [200.0, 0.5, 30.0, 115.0]
+
     # Lat/Long/Alt of Cape Canaveral
     cape_lla_deg = [28.3922, -80.6077, 0]
 
@@ -40,7 +43,7 @@ def user_input_terminal():
     cape_cart_m = [i * 1000 for i in cape_cart_km]
 
     # Fake Data to test inputs
-    inputs = InputStructure(25000.0, cape_cart_m, 'Cartesian', init_time, 3600, 1, 'historical')
+    inputs = InputStructure(25000.0, cape_cart_m, 'Cartesian', init_time, 3600, 1, 'historical', constants)
 
     # If inputs are Cartesian then directly translate
     if inputs.launch_location_type == 'Cartesian':
@@ -69,6 +72,7 @@ class InputStructure:
     launch_duration: int
     mode: int
     weather_model: str
+    constants: ty.List[float]
     launch_location_cart: ty.Optional[ty.List[float]] = None
     launch_init_state: ty.Optional[ty.List[float]] = None
 

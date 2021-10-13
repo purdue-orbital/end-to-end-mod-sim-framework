@@ -138,6 +138,7 @@ if "__main__":
     All high-level framework logic and flow should be defined here
     """
     inputs = user_input.user_input()
+    mass, coeff_drag, balloon_cross_area, balloon_volume = inputs.constants
     # If user specifies mode = 1, they want a single run of balloon 3DoF model
     if inputs.mode == 1:
         # Assign the returned data from function to data structs

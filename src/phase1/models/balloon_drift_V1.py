@@ -7,16 +7,36 @@ import random as rand
 import scipy.integrate as integrate
 import typing as ty
 from balloonEphemerisWriter import balloonEphemerisWriter
+# Import global constants from main
+from main import mass, coeff_drag, balloon_cross_area, balloon_volume
 
 
-def balloon_force_models():
+def balloon_force_models(wind_vel_vert):
     """
     Function to define and calculate
     forces acting on balloon system
     """
-    pass
 
-    return
+    atm_density = 1.225
+    wind_vel = [1, 2, 3]
+
+    # Force calculations
+    gravity = mass * 9.18
+    buoyancy = atm_density * balloon_volume
+    drag_x = 0.5 * atm_density * wind_vel[1]^2 * coeff_drag * balloon_cross_area
+    drag_y = 0.5 * atm_density * wind_vel[0]^2 * coeff_drag * balloon_cross_area
+    drag_z = 0.5 * atm_density * (wind_vel[2] - wind_vel_vert)^2 * coeff_drag * balloon_cross_area
+
+    # accels is the acceleration in [x, y, z]
+    accels = [0, 0, 0]
+    # Acceleration in x-direction 
+    accels[0] = drag_x / mass
+    # Acceleration in y-direction 
+    accels[1] = drag_y / mass
+    # Acceleration in z-direction 
+    accels[2] = (buoyancy - gravity - drag_z) / mass 
+
+    return accels
 
 
 def balloon_EOM(t, vars):
@@ -25,6 +45,8 @@ def balloon_EOM(t, vars):
     Contains state variable assignments 
     and calls to force model functions.
     """
+    accels = balloon_force_models(vars[5])
+
     # First three values: vx, vy, vz [m/s]
     # Second three values: ax, ay, az [m/s^2]
     vars_dot = np.array([0, 0, 0, 0, 0, 0]).astype(float)
@@ -33,9 +55,9 @@ def balloon_EOM(t, vars):
     vars_dot[1] = vars[4]
     vars_dot[2] = vars[5]
     # Assign accelerations as a function of force models
-    vars_dot[3] = rand.uniform(-0.01, 0.025)
-    vars_dot[4] = rand.uniform(-0.02, 0.01)
-    vars_dot[5] = rand.uniform(-0.01, 0.03)
+    vars_dot[3] = accels[0]
+    vars_dot[4] = accels[1]
+    vars_dot[5] = accels[2]
     
     return vars_dot
 
