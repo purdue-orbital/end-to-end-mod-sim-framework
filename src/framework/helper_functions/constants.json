@@ -1,0 +1,11 @@
+{
+  "G": 6.67408E-11,
+  "EarthMu": 3.986004418E14,
+  "J2": 1.08262668E-3,
+  "EarthRadiusEquator": 6378E3,
+  "EarthMeanRadius": 6371E3,
+  "EarthMass": 5.9724E24,
+  "EarthMeanAccelerationSeaLevel": 9.80665,
+  "SolarIrradianceOneAU": 1361.0,
+  "AtmosphericDensitySeaLevel": 1.225
+}
