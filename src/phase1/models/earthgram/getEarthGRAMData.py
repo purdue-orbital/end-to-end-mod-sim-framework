@@ -1,6 +1,6 @@
 def getEarthGRAMData(BALLOON,CONE1):
     """-----------------------------------------------------------------------------------------
-    CONE_OUT = writeTrajFile(T,V,CONE)
+    CONE_OUT = getEarthGRAMData(T,V,CONE)
     Function to write txt file with atmosphere cone to input to EarthGRAM
     Inputs:
         BALLOON     - structure state at current time (object with fields below):
@@ -25,6 +25,34 @@ def getEarthGRAMData(BALLOON,CONE1):
             .TEMP   - temperature (K)
             .P      - pressure (N/m^2)
     -----------------------------------------------------------------------------------------"""
+
+    import datetime
+    import os
+
+## input file ##
+
+    # open and read input file from repository
+    f =  open("InputFile.txt",'r')
+    input_txt = f.readlines()
+    f.close()
+
+    os.remove("InputFile.txt")      # remove original file
+
+    f = open("InputFile.txt",'w')   # create new file
+
+    # update starting date and time
+    input_txt[23] = f'  mn = {BALLOON.T.month}\n'
+    input_txt[24] = f'  ida = {BALLOON.T.day}\n'
+    input_txt[25] = f'  iyr = {BALLOON.T.year}\n'
+    input_txt[26] = f'  ihro = {BALLOON.T.hour}\n'
+    input_txt[27] = f'  mino = {BALLOON.T.minute}\n'
+    input_txt[28] = f'  seco = {BALLOON.T.second}\n'
+
+    # update and close new input file
+    f.writelines(input_txt)
+    f.close()
+
+## initialization ##
 
     elapsed_time = []       # elapsed seconds since initial balloon state based on current altitude and vz
 
