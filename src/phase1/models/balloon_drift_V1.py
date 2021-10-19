@@ -2,30 +2,35 @@
 import numpy as np
 import pyquaternion as quat 
 from dataclasses import dataclass
+import astropy.coordinates as coord
 import datetime as t
 import random as rand
 import scipy.integrate as integrate
 import typing as ty
 from balloonEphemerisWriter import balloonEphemerisWriter
 # Import global constants from main
-from main import mass, coeff_drag, balloon_cross_area, balloon_volume
+from main import mass, coeff_drag, balloon_cross_area, balloon_volume, launch_time
 
 
-def balloon_force_models(wind_vel_vert):
+def get_earthgram_data(current_point, current_time):
+    
+    wind_vel = [1,2,3]
+    atm_density = 1.225
+    
+    return wind_vel, atm_density
+
+def balloon_force_models(vel_vert, wind_vel, atm_density):
     """
     Function to define and calculate
     forces acting on balloon system
     """
-
-    atm_density = 1.225
-    wind_vel = [1, 2, 3]
 
     # Force calculations
     gravity = mass * 9.18
     buoyancy = atm_density * balloon_volume
     drag_x = 0.5 * atm_density * wind_vel[1]^2 * coeff_drag * balloon_cross_area
     drag_y = 0.5 * atm_density * wind_vel[0]^2 * coeff_drag * balloon_cross_area
-    drag_z = 0.5 * atm_density * (wind_vel[2] - wind_vel_vert)^2 * coeff_drag * balloon_cross_area
+    drag_z = 0.5 * atm_density * (wind_vel[2] - vel_vert)^2 * coeff_drag * balloon_cross_area
 
     # accels is the acceleration in [x, y, z]
     accels = [0, 0, 0]
@@ -45,7 +50,22 @@ def balloon_EOM(t, vars):
     Contains state variable assignments 
     and calls to force model functions.
     """
-    accels = balloon_force_models(vars[5])
+    
+    current_point = vars[0:3]
+    current_time = launch_time + t
+    #TODO: send Lorin the following:
+    #   .T      - current time (datetime)
+    #   .LAT    - degrees latitude (+N,-S)
+    #   .LONG   - degrees longitude (+E,-W)
+    #   .ALT    - altitude (km)
+    #   .VZ     - current vertical speed (m/s)
+
+    #TODO: create function to get necessary data
+    wind_vel, atm_density = get_earthgram_data(current_point, current_time)
+    atm_density = 1.225
+    wind_vel = [1, 2, 3]
+    
+    accels = balloon_force_models(vars[5], wind_vel, atm_density)
 
     # First three values: vx, vy, vz [m/s]
     # Second three values: ax, ay, az [m/s^2]

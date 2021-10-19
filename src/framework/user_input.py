@@ -31,9 +31,10 @@ def user_input_terminal():
     
     # Initial time
     init_time = '6 Aug 2021 23:59:42.000000'
+    launch_time = t.datetime(2023, 5, 15, 12, 0, 0)
 
     # Constant values [mass [kg], coefficient of drag, cross-sectional balloon area [m^2]]
-    constants = [200.0, 0.5, 30.0, 115.0]
+    constants = [200.0, 0.5, 30.0, 115.0, launch_time]
 
     # Lat/Long/Alt of Cape Canaveral
     cape_lla_deg = [28.3922, -80.6077, 0]
