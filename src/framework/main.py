@@ -139,6 +139,7 @@ if "__main__":
     """
     inputs = user_input.user_input()
     mass, coeff_drag, balloon_cross_area, balloon_volume, launch_time = inputs.constants
+    EARTH_RADIUS = 6373.455
     # If user specifies mode = 1, they want a single run of balloon 3DoF model
     if inputs.mode == 1:
         # Assign the returned data from function to data structs
