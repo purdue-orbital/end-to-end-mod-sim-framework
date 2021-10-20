@@ -13,7 +13,7 @@ MASTRAB (Modeling and Simulation of Trajectories for Rocket and Balloon)
 * Always develop new code on a development branch, *NOT MAIN*
 * Always create a Pull Request to merge your code into main
 * All new code should have associated unit tests
-* Generally try to follow the PEP8 Python style guide documented here: https://www.python.org/dev/peps/pep-0008/
+* Follow the PEP8 Python style guide documented here: https://www.python.org/dev/peps/pep-0008/
 
 # Phases
 * phase 1 represents the mission phase beginning from the ground and ending with the launch platform and rocket being GO for launch
