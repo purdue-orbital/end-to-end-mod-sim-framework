@@ -1,4 +1,5 @@
 # Import standard external libraries and imports
+from astropy.coordinates import earth
 import numpy as np
 import pyquaternion as quat 
 from dataclasses import dataclass
@@ -9,15 +10,64 @@ import scipy.integrate as integrate
 import typing as ty
 from balloonEphemerisWriter import balloonEphemerisWriter
 # Import global constants from main
-from main import mass, coeff_drag, balloon_cross_area, balloon_volume, launch_time
+from main import mass, coeff_drag, balloon_cross_area, balloon_volume, launch_time, EARTH_RADIUS
 
 
-def get_earthgram_data(current_point, current_time):
+def earthgram_points(current_point):
+    """
+    Description: Function to create a grid of points for EarthGRAM to generate data
+
+    Inputs:
+    - current_point: [x, y, z] points in a numpy array
     
+    Outputs:
+    - grid: a list of points in the format [[x,y,z],[x,y,z],...] which represents the grid
+    """
+
+    grid = []
+
+    # Simple straight line of points going up in increments of 10 meters up to 50 meters
+    for i in range(6):
+        grid.append([current_point[0], current_point[1] + i * 10, current_point[2]])    
+
+    return grid
+
+
+def call_earthgram_func(current_point, current_vel, current_time):
+    """
+    Description: Function to organize data and call function to fetch EarthGRAM data
+
+    Inputs:
+    - current_point: [x, y, z] points in a numpy array
+    - current_vel: [vx, vy, vz] points in a numpy array
+    - current_time: current time in datetime format
+    
+    Outputs:
+    - wind_vel: wind velocity [N-S, E-W, Radial] in a list
+    - atm_density: atmospheric density as a float
+    """
+
+    _geocentric_astropy_obj = coord.EarthLocation.from_geocentric(current_point)
+    lat, long, alt = _geocentric_astropy_obj.geodetic
+    pos_mag = (np.linalg.norm(current_point) - EARTH_RADIUS)
+    unit_radial = [i / pos_mag for i in current_point]
+    vert_vel = np.dot(current_vel, unit_radial)
+
+    _balloon_state = BalloonState(current_time, lat, long, alt, vert_vel)
+
+    grid = earthgram_points(current_point)
+    grid_points = []
+    for point in grid:
+        _geocentric_astropy_obj = coord.EarthLocation.from_geocentric(point)
+        grid_points.append(_geocentric_astropy_obj.geodetic)
+    _gram_grid = GramGrid(grid_points[:][0], grid_points[:][1], grid_points[:][2])
+
+    wind_vel, atm_density = get_earthgram_data(_balloon_state, _gram_grid)
     wind_vel = [1,2,3]
     atm_density = 1.225
     
     return wind_vel, atm_density
+
 
 def balloon_force_models(vel_vert, wind_vel, atm_density):
     """
@@ -51,19 +101,19 @@ def balloon_EOM(t, vars):
     and calls to force model functions.
     """
     
-    current_point = vars[0:3]
+    current_point = np.array(vars[0:3])
+    current_vel = np.array(vars[2:6])
     current_time = launch_time + t
-    #TODO: send Lorin the following:
-    #   .T      - current time (datetime)
-    #   .LAT    - degrees latitude (+N,-S)
-    #   .LONG   - degrees longitude (+E,-W)
-    #   .ALT    - altitude (km)
-    #   .VZ     - current vertical speed (m/s)
 
-    #TODO: create function to get necessary data
-    wind_vel, atm_density = get_earthgram_data(current_point, current_time)
-    atm_density = 1.225
-    wind_vel = [1, 2, 3]
+    #TODO: Build function to check if balloon is outside of earthgram data grid
+    out_of_bounds = 1
+
+    if out_of_bounds == 1:
+        earth_gram_data = call_earthgram_func(current_point, current_vel, current_time)
+    
+    #TODO: Build method to determine which point to use in earthgram data grid
+    wind_vel = [earth_gram_data.vx, earth_gram_data.vy, earth_gram_data.vz]
+    atm_density = earth_gram_data.rho
     
     accels = balloon_force_models(vars[5], wind_vel, atm_density)
 
@@ -128,6 +178,7 @@ def balloon_model_V1(inputs):
     # Return data object structure for reference in main code
     return dat
 
+
 @dataclass
 class EphemerisDataStruct_Balloon:
     """ 
@@ -141,3 +192,27 @@ class EphemerisDataStruct_Balloon:
     attitude: ty.Optional[quat.Quaternion] = None
     model_run_status: ty.Optional[str] = None
     refFrame: ty.Optional[object] = None
+
+
+@dataclass
+class BalloonState:
+    """ 
+    Establishes a standardized data structure class to contain the
+    instantaneous balloon state at a given time
+    """
+    date_time: t.datetime
+    lat: float
+    long: float
+    alt: float
+    vert_speed: float    
+
+
+@dataclass
+class GramGrid:
+    """ 
+    Establishes a standardized data structure class to contain the
+    grid of points that will be passed to EarthGram to fetch next set of data
+    """
+    lat: ty.List[float]
+    long: ty.List[float]
+    alt: ty.List[float]
