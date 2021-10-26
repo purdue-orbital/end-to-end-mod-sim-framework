@@ -4,8 +4,8 @@ from pynput.keyboard import Key, Controller as KeyboardController
 
 #Runs GRAM2016.exe with inputs for MyTest
 #Make sure not to click off of the pop-up
-#Opens the txt file to get inputs
-#The file name should be in the folder you are working in
+#Opens the txt file "Absolute File Path.txt" to get inputs
+#The file should be in the folder you are working in
 
 #Make sure the order is: 
 
@@ -13,11 +13,9 @@ from pynput.keyboard import Key, Controller as KeyboardController
 #input path
 #Ref file name
 
-def RunningGram(fileName):
+def RunningGram():
 
-
-
-    f = open(fileName, "r")
+    f = open("Absolute File Path.txt", "r")
 
     lines = f.readlines()
     f.close()
