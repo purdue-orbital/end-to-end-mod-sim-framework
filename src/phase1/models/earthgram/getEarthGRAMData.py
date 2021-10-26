@@ -1,33 +1,32 @@
-def getEarthGRAMData(BALLOON,CONE1):
+import datetime
+import os
+from dataclasses import dataclass
+import typing as ty
+
+def getEarthGRAMData(_balloon_state,_gram_grid):
     """-----------------------------------------------------------------------------------------
-    CONE_OUT = getEarthGRAMData(T,V,CONE)
+    CONE_OUT = getEarthGRAMData(_balloon_state,_gram_grid)
     Function to write txt file with atmosphere cone to input to EarthGRAM
     Inputs:
-        BALLOON     - structure state at current time (object with fields below):
-            .T      - current time (datetime)
-            .LAT    - degrees latitude (+N,-S)
-            .LONG   - degrees longitude (+E,-W)
-            .ALT    - altitude (km)
-            .VZ     - current vertical speed (m/s)
-        CONE - desired atmospheric data points (object with fields below):
-            .LAT    - degrees latitude (+N,-S)
-            .LONG   - degrees longitude (+E,-W)
-            .ALT    - altitude (km)
+        _balloon_state  - structure state at current time (object with required fields below):
+            .date_time  - current time (datetime)
+            .vert_speed - current vertical speed (m/s)
+        _gram_grid      - desired atmospheric data points (object with fields below):
+            .lat    - degrees latitude (+N,-S)
+            .long   - degrees longitude (+E,-W)
+            .alt    - altitude (km)
     Outputs:
-        CONE_OUT    - atmospheric properties at each cone point (object with fields below):
-            .LAT    - degrees latitude (+N,-S)
-            .LONG   - degrees longitude (+E,-W)
-            .ALT    - altitude (km)
-            .VX     - E-W wind speed (m/s)
-            .VY     - N-S wind speed (m/s)
-            .VZ     - vertical wind speed (m/s)
-            .RHO    - atmospheric density (kg/m^3)
-            .TEMP   - temperature (K)
-            .P      - pressure (N/m^2)
+        _grid_out   - atmospheric properties at each cone point (object with fields below):
+            .lat    - degrees latitude (+N,-S)
+            .long   - degrees longitude (+E,-W)
+            .alt    - altitude (km)
+            .vx     - E-W wind speed (m/s)
+            .vy     - N-S wind speed (m/s)
+            .vz     - vertical wind speed (m/s)
+            .rho    - atmospheric density (kg/m^3)
+            .temp   - temperature (K)
+            .p      - pressure (N/m^2)
     -----------------------------------------------------------------------------------------"""
-
-    import datetime
-    import os
 
 ## input file ##
 
@@ -41,12 +40,12 @@ def getEarthGRAMData(BALLOON,CONE1):
     f = open("InputFile.txt",'w')   # create new file
 
     # update starting date and time
-    input_txt[23] = f'  mn = {BALLOON.T.month}\n'
-    input_txt[24] = f'  ida = {BALLOON.T.day}\n'
-    input_txt[25] = f'  iyr = {BALLOON.T.year}\n'
-    input_txt[26] = f'  ihro = {BALLOON.T.hour}\n'
-    input_txt[27] = f'  mino = {BALLOON.T.minute}\n'
-    input_txt[28] = f'  seco = {BALLOON.T.second}\n'
+    input_txt[23] = f'  mn = {_balloon_state.date_time.month}\n'
+    input_txt[24] = f'  ida = {_balloon_state.date_time.day}\n'
+    input_txt[25] = f'  iyr = {_balloon_state.date_time.year}\n'
+    input_txt[26] = f'  ihro = {_balloon_state.date_time.hour}\n'
+    input_txt[27] = f'  mino = {_balloon_state.date_time.minute}\n'
+    input_txt[28] = f'  seco = {_balloon_state.date_time.second}\n'
 
     # update and close new input file
     f.writelines(input_txt)
@@ -56,16 +55,59 @@ def getEarthGRAMData(BALLOON,CONE1):
 
     elapsed_time = []       # elapsed seconds since initial balloon state based on current altitude and vz
 
-    for x in CONE1.ALT:
-        elapsed_time.append((x - BALLOON.ALT)*1000/BALLOON.VZ)
+    for x in _gram_grid.alt:
+        elapsed_time.append((x - _balloon_state.alt)*1000/_balloon_state.vert_speed)
     
-    with open('cone_file.txt','w') as f:    # open text file
+    with open('traj_file.txt','w') as f:    # open text file
         f.writelines('')                    # clear file content
-        for i in range(len(CONE1.ALT)):     # write trajectory file in format accepted by EarthGRAM
-            f.write("{}\t{}\t{}\t{}\n".format(elapsed_time[i],CONE1.ALT[i],CONE1.LAT[i],CONE1.LONG[i]))
+        for i in range(len(_gram_grid.alt)):     # write trajectory file in format accepted by EarthGRAM
+            f.write("{}\t{}\t{}\t{}\n".format(elapsed_time[i],_gram_grid.alt[i],_gram_grid.lat[i],_gram_grid.long[i]))
 
     """Placeholder to call EarthGRAM.exe to run trajectory file. Note, the "Input file" passed to Earth gram will be preset in the git repo
     and will not need to be edited between simulations. Only the Trajectory file gets updated, which is automated through the use of this 
     function."""
 
-    
+## output formatting ##
+    with open('output.txt', newline = '') as f:     # open and read earthGRAM output file
+	    output_txt = f.readlines()
+
+    temporary_var = []  # temporary variable for data storage in for loop
+
+    _grid_out = OutputGrid([],[],[],[],[],[],[],[],[])  # initialize output data object
+
+    for i in range(len(output_txt)):        # find starting line to read data
+        if "Positions generated" in output_txt[i]:
+            start_line = i + 2
+            break
+        else:
+            start_line = 35
+
+    for i in x:         # store desired output data
+        temporary_var = output_txt[start_line + 13*i].split()
+
+        _grid_out.alt.append(temporary_var[0])
+        _grid_out.lat.append(temporary_var[1])
+        _grid_out.long.append(temporary_var[2])
+        _grid_out.p.append(temporary_var[3])
+        _grid_out.rho.append(temporary_var[4])
+        _grid_out.temp.append(temporary_var[5])
+        _grid_out.vE.append(temporary_var[6])
+        _grid_out.vN.append(temporary_var[7])
+        _grid_out.vz.append(temporary_var[8])
+
+    return _grid_out
+
+@dataclass
+class OutputGrid:
+    """
+    Creates data structure class to organize earthGRAM output data into an output object
+    """
+    lat: ty.List[float]
+    long: ty.List[float]
+    alt: ty.List[float]
+    vE: ty.List[float]
+    vN: ty.List[float]
+    vz: ty.List[float]
+    rho: ty.List[float]
+    temp: ty.List[float]
+    p: ty.List[float]
