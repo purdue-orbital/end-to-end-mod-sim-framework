@@ -13,6 +13,13 @@ from balloonEphemerisWriter import balloonEphemerisWriter
 from main import mass, coeff_drag, balloon_cross_area, balloon_volume, launch_time, EARTH_RADIUS
 
 
+def cardinal_to_cart(_grid_out):
+
+    for i in range(len(_grid_out.lat)):
+        pass
+
+    return wind_vel_cart
+
 def earthgram_points(current_point):
     """
     Description: Function to create a grid of points for EarthGRAM to generate data
@@ -47,7 +54,7 @@ def call_earthgram_func(current_point, current_vel, current_time):
     - atm_density: atmospheric density as a float
     """
 
-    _geocentric_astropy_obj = coord.EarthLocation.from_geocentric(current_point)
+    _geocentric_astropy_obj = earth.from_geocentric(current_point)
     lat, long, alt = _geocentric_astropy_obj.geodetic
     pos_mag = (np.linalg.norm(current_point) - EARTH_RADIUS)
     unit_radial = [i / pos_mag for i in current_point]
@@ -58,13 +65,13 @@ def call_earthgram_func(current_point, current_vel, current_time):
     grid = earthgram_points(current_point)
     grid_points = []
     for point in grid:
-        _geocentric_astropy_obj = coord.EarthLocation.from_geocentric(point)
+        _geocentric_astropy_obj = earth.from_geocentric(point)
         grid_points.append(_geocentric_astropy_obj.geodetic)
     _gram_grid = GramGrid(grid_points[:][0], grid_points[:][1], grid_points[:][2])
 
-    wind_vel, atm_density = get_earthgram_data(_balloon_state, _gram_grid)
-    wind_vel = [1,2,3]
-    atm_density = 1.225
+    _grid_out = get_earthgram_data(_balloon_state, _gram_grid)
+    wind_vel = cardinal_to_cart(_grid_out)
+    atm_density = _grid_out.rho
     
     return wind_vel, atm_density
 
