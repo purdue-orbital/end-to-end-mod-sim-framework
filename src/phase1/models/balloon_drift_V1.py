@@ -14,11 +14,23 @@ from main import mass, coeff_drag, balloon_cross_area, balloon_volume, launch_ti
 
 
 def cardinal_to_cart(_grid_out):
+    """
+    Description: Function to rotate vector from cardinal frame (r, N, E)
+    to cartesian frame (x, y, z)
 
+    Inputs:
+    - _grid_out: object containing earthgram data corresponding to current grid
+
+    Outputs:
+    - wind_vel_cart: a list of wind velocities in the cartesian frame in the
+    format [[x,y,z],[x,y,z],...] corresponding to the grid order 
+    """
     for i in range(len(_grid_out.lat)):
         pass
+    wind_vel_cart = 0
 
     return wind_vel_cart
+
 
 def earthgram_points(current_point):
     """
@@ -70,7 +82,8 @@ def call_earthgram_func(current_point, current_vel, current_time):
     _gram_grid = GramGrid(grid_points[:][0], grid_points[:][1], grid_points[:][2])
 
     _grid_out = get_earthgram_data(_balloon_state, _gram_grid)
-    wind_vel = cardinal_to_cart(_grid_out)
+    # wind_vel = cardinal_to_cart(_grid_out)
+    wind_vel = [_grid_out.vx, _grid_out.vy, _grid_out.vz]
     atm_density = _grid_out.rho
     
     return wind_vel, atm_density
