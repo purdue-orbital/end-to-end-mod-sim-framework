@@ -2,8 +2,9 @@ import datetime
 import os
 from dataclasses import dataclass
 import typing as ty
+from RunningGram import RunningGram
 
-def getEarthGRAMData(_balloon_state,_gram_grid):
+def get_earthgram_data(_balloon_state,_gram_grid):
     """-----------------------------------------------------------------------------------------
     CONE_OUT = getEarthGRAMData(_balloon_state,_gram_grid)
     Function to write txt file with atmosphere cone to input to EarthGRAM
@@ -63,9 +64,9 @@ def getEarthGRAMData(_balloon_state,_gram_grid):
         for i in range(len(_gram_grid.alt)):     # write trajectory file in format accepted by EarthGRAM
             f.write("{}\t{}\t{}\t{}\n".format(elapsed_time[i],_gram_grid.alt[i],_gram_grid.lat[i],_gram_grid.long[i]))
 
-    """Placeholder to call EarthGRAM.exe to run trajectory file. Note, the "Input file" passed to Earth gram will be preset in the git repo
-    and will not need to be edited between simulations. Only the Trajectory file gets updated, which is automated through the use of this 
-    function."""
+## Run EarthGRAM.exe to generate atmospheric data
+
+    RunningGram()
 
 ## output formatting ##
     with open('output.txt', newline = '') as f:     # open and read earthGRAM output file
