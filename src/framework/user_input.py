@@ -28,10 +28,22 @@ def user_input_gui():
 
 
 def user_input_terminal():
-    # Fake Data to test inputs
-    inputs = InputStructure(25000.0, [28.3922, -80.6077, 0], t.datetime(2025, 6, 21, 7), 3600, 1, 'historical')
+    
+    # Lat/Long/Alt of Cape Canaveral
+    cape_lla_deg = [28.3922, -80.6077, 0]
 
-    inputs.launch_location_cart = inputs.lla_to_cartesian()
+    # Cartesian Position for Cape Canaveral (from STK)
+    cape_cart_km = [916.357, -5539.88, 3014.8]
+    cape_cart_m = [i * 1000 for i in cape_cart_km]
+
+    # Fake Data to test inputs
+    inputs = InputStructure(25000.0, cape_cart_m, 'Cartesian', t.datetime(2025, 6, 21, 7), 3600, 1, 'historical')
+
+    if inputs.launch_location_type == 'Cartesian':
+        inputs.launch_location_cart = inputs.launch_location_lla
+
+    if inputs.launch_location_type == 'Lat-Long-Alt':
+        inputs.launch_location_cart = inputs.lla_to_cartesian()
 
     return inputs
 
@@ -41,6 +53,7 @@ class InputStructure:
 
     launch_alt: float
     launch_location_lla: ty.List[float]
+    launch_location_type: str
     launch_date: int
     launch_duration: int
     mode: int
