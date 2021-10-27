@@ -1,3 +1,4 @@
+import numpy as np
 import datetime as t
 from dataclasses import dataclass
 import typing as ty
@@ -5,6 +6,7 @@ import typing as ty
 #import libs for user_input_gui() func
 from tkinter import *
 from tkinter import messagebox
+import math
 
 
 def user_input():
@@ -209,7 +211,10 @@ def user_input_gui():
 
 def user_input_terminal():
     # Fake Data to test inputs
-    inputs = InputStructure(25000.0, [47, 56], t.datetime(2025, 6, 21, 7), 1, 'historical')
+    inputs = InputStructure(25000.0, [28.3922, -80.6077, 0], t.datetime(2025, 6, 21, 7), 3600, 1, 'historical')
+
+    inputs.launch_location_cart = inputs.lla_to_cartesian()
+
     return inputs
 
 
@@ -217,18 +222,19 @@ def user_input_terminal():
 class InputStructure:
 
     launch_alt: float
-    #getting except from the commented line below
     launch_location_lla: ty.List[float]
-    launch_date: t.datetime
+    launch_date: int
+    launch_duration: int
     mode: int
     weather_model: str
+    launch_location_cart: ty.Optional[ty.List[float]] = None
 
-    def lla_to_cartesian(launch_location_lla):
-        
-        #todo: logic to convert from lla to cartesian
-
-        launch_location_cart = launch_location_lla
-
-        return launch_location_cart
-
-        
+    def lla_to_cartesian(self):     
+        latitude, longitude = np.deg2rad(self.launch_location_lla[0:2])
+        altitude = self.launch_location_lla[2]
+        cart = []
+        R = 6378137.0 + altitude  # relative to centre of the earth     
+        cart.append(R * math.cos(longitude) * math.cos(latitude))
+        cart.append(R * math.sin(longitude) * math.cos(latitude))
+        cart.append(R * math.sin(latitude))
+        return cart
