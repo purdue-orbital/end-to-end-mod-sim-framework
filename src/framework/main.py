@@ -10,7 +10,6 @@ import sys
 sys.path.append('../phase1/models/')
 sys.path.append('../phase2/models/')
 sys.path.append('../phase3/models/')
-sys.path.append('C:/git/EarthGRAM2016Version2.0/MyTest/')
 import user_input
 from balloon_drift_V1 import balloon_model_V1
 
