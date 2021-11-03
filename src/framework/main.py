@@ -10,6 +10,7 @@ import sys
 sys.path.append('../phase1/models/')
 sys.path.append('../phase2/models/')
 sys.path.append('../phase3/models/')
+sys.path.append('C:/git/EarthGRAM2016Version2.0/MyTest/')
 import user_input
 from balloon_drift_V1 import balloon_model_V1
 
@@ -138,8 +139,6 @@ if "__main__":
     All high-level framework logic and flow should be defined here
     """
     inputs = user_input.user_input()
-    mass, coeff_drag, balloon_cross_area, balloon_volume, launch_time = inputs.constants
-    EARTH_RADIUS = 6373.455
     # If user specifies mode = 1, they want a single run of balloon 3DoF model
     if inputs.mode == 1:
         # Assign the returned data from function to data structs
