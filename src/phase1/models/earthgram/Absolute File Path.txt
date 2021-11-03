@@ -1,0 +1,3 @@
+C:\git\EarthGRAM2016Version2.0\MyTest\GRAM2016.exe
+C:\git\EarthGRAM2016Version2.0\MyTest\
+InputFile.txt
