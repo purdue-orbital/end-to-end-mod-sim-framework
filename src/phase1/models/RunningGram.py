@@ -15,7 +15,7 @@ from pynput.keyboard import Key, Controller as KeyboardController
 
 def RunningGram():
 
-    f = open("Absolute File Path.txt", "r")
+    f = open("FilePaths.txt", "r")
 
     lines = f.readlines()
     f.close()

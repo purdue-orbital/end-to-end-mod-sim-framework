@@ -32,13 +32,13 @@ def get_earthgram_data(_balloon_state,_gram_grid):
 ## input file ##
 
     # open and read input file from repository
-    f =  open("InputFile.txt",'r')
+    f =  open("earthgram/InputFile.txt",'r')
     input_txt = f.readlines()
     f.close()
 
-    os.remove("InputFile.txt")      # remove original file
+    os.remove("earthgram/InputFile.txt")      # remove original file
 
-    f = open("InputFile.txt",'w')   # create new file
+    f = open("earthgram/InputFile.txt",'w')   # create new file
 
     # update starting date and time
     input_txt[23] = f'  mn = {_balloon_state.date_time.month}\n'
@@ -59,7 +59,7 @@ def get_earthgram_data(_balloon_state,_gram_grid):
     for x in _gram_grid.alt:
         elapsed_time.append((x - _balloon_state.alt)*1000/_balloon_state.vert_speed)
     
-    with open('traj_file.txt','w') as f:    # open text file
+    with open('earthgram/traj_file.txt','w') as f:    # open text file
         f.writelines('')                    # clear file content
         for i in range(len(_gram_grid.alt)):     # write trajectory file in format accepted by EarthGRAM
             f.write("{}\t{}\t{}\t{}\n".format(elapsed_time[i],_gram_grid.alt[i],_gram_grid.lat[i],_gram_grid.long[i]))
@@ -69,7 +69,7 @@ def get_earthgram_data(_balloon_state,_gram_grid):
     RunningGram()
 
 ## output formatting ##
-    with open('output.txt', newline = '') as f:     # open and read earthGRAM output file
+    with open('earthgram/output.txt', newline = '') as f:     # open and read earthGRAM output file
 	    output_txt = f.readlines()
 
     temporary_var = []  # temporary variable for data storage in for loop
