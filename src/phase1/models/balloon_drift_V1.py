@@ -7,7 +7,7 @@ import datetime
 import scipy.integrate as integrate
 import typing as ty
 from balloonEphemerisWriter import balloonEphemerisWriter
-from getEarthGRAMData import getEarthGRAMData
+from get_earthgram_data import get_earthgram_data
 
 
 def cardinal_to_cart(_grid_out):
@@ -78,7 +78,7 @@ def call_earthgram_func(current_point, current_vel, current_time):
         grid_points.append(_geocentric_astropy_obj.geodetic)
     _gram_grid = GramGrid(grid_points[:][0], grid_points[:][1], grid_points[:][2])
 
-    _grid_out = getEarthGRAMData(_balloon_state, _gram_grid)
+    _grid_out = get_earthgram_data(_balloon_state, _gram_grid)
     # wind_vel = cardinal_to_cart(_grid_out)
     wind_vel = [_grid_out.vx, _grid_out.vy, _grid_out.vz]
     atm_density = _grid_out.rho
