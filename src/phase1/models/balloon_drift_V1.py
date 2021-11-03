@@ -3,14 +3,11 @@ from astropy.coordinates import earth
 import numpy as np
 import pyquaternion as quat 
 from dataclasses import dataclass
-import astropy.coordinates as coord
-import datetime as t
-import random as rand
+import datetime
 import scipy.integrate as integrate
 import typing as ty
 from balloonEphemerisWriter import balloonEphemerisWriter
-# Import global constants from main
-from main import mass, coeff_drag, balloon_cross_area, balloon_volume, launch_time, EARTH_RADIUS
+from getEarthGRAMData import getEarthGRAMData
 
 
 def cardinal_to_cart(_grid_out):
@@ -66,7 +63,7 @@ def call_earthgram_func(current_point, current_vel, current_time):
     - atm_density: atmospheric density as a float
     """
 
-    _geocentric_astropy_obj = earth.from_geocentric(current_point)
+    _geocentric_astropy_obj = earth.EarthLocation.from_geocentric(current_point[0],current_point[1],current_point[2],unit='meter')
     lat, long, alt = _geocentric_astropy_obj.geodetic
     pos_mag = (np.linalg.norm(current_point) - EARTH_RADIUS)
     unit_radial = [i / pos_mag for i in current_point]
@@ -77,11 +74,11 @@ def call_earthgram_func(current_point, current_vel, current_time):
     grid = earthgram_points(current_point)
     grid_points = []
     for point in grid:
-        _geocentric_astropy_obj = earth.from_geocentric(point)
+        _geocentric_astropy_obj = earth.EarthLocation.from_geocentric(point[0],point[1],point[2],unit='meter')
         grid_points.append(_geocentric_astropy_obj.geodetic)
     _gram_grid = GramGrid(grid_points[:][0], grid_points[:][1], grid_points[:][2])
 
-    _grid_out = get_earthgram_data(_balloon_state, _gram_grid)
+    _grid_out = getEarthGRAMData(_balloon_state, _gram_grid)
     # wind_vel = cardinal_to_cart(_grid_out)
     wind_vel = [_grid_out.vx, _grid_out.vy, _grid_out.vz]
     atm_density = _grid_out.rho
@@ -122,8 +119,8 @@ def balloon_EOM(t, vars):
     """
     
     current_point = np.array(vars[0:3])
-    current_vel = np.array(vars[2:6])
-    current_time = launch_time + t
+    current_vel = np.array(vars[3:6])
+    current_time = launch_time + datetime.timedelta(seconds=t)
 
     #TODO: Build function to check if balloon is outside of earthgram data grid
     out_of_bounds = 1
@@ -166,6 +163,11 @@ def balloon_model_V1(inputs):
     - None yet
     """
 
+    # Define global variables
+    global mass, coeff_drag, balloon_cross_area, balloon_volume, launch_time, EARTH_RADIUS
+    mass, coeff_drag, balloon_cross_area, balloon_volume, launch_time = inputs.constants
+    EARTH_RADIUS = 6373.455
+
     # Initialize an instance of the data class to store data
     balloon_data = EphemerisDataStruct_Balloon()
     # Set the data objects launch date, launch duration, and initial state from inputs
@@ -205,8 +207,8 @@ class EphemerisDataStruct_Balloon:
     Establishes a standardized data structure class to contain the
     full time range ephemeris for a single balloon model run
     """
-    init_time: ty.Optional[t.datetime] = None
-    duration: ty.Optional[t.datetime] = None
+    init_time: ty.Optional[datetime.datetime] = None
+    duration: ty.Optional[datetime.datetime] = None
     time: ty.Optional[np.array] = None
     pos_vel: ty.Optional[np.array] = None
     attitude: ty.Optional[quat.Quaternion] = None
@@ -220,7 +222,7 @@ class BalloonState:
     Establishes a standardized data structure class to contain the
     instantaneous balloon state at a given time
     """
-    date_time: t.datetime
+    date_time: datetime.datetime
     lat: float
     long: float
     alt: float
