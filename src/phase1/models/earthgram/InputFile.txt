@@ -1,13 +1,13 @@
  $namein_e10
-  atmpath = C:\git\EarthGRAM2016Version2.0\IOfiles\
-  NCEPpath = C:\git\EarthGRAM2016Version2.0\NCEPdata\FixedBin\  
-  trapath = null
+  atmpath = IOfiles\
+  NCEPpath = NCEPdata\FixedBin\  
+  trapath = traj_file.txt
   prtpath = output.txt
-  nprpath =  special.txt
-  conpath =  species.txt
-  rrapath = C:\git\EarthGRAM2016Version2.0\RRAdata\
-  rralist = rrasites.txt	
-  profile = RRAanfAnn.txt
+  nprpath =  null
+  conpath =  null
+  rrapath = RRAdata\
+  rralist = null
+  profile = null
   h1 = 0.0
   phi1 = 28.45
   thet1 = -84.53
@@ -21,9 +21,9 @@
   y10     = 0.
   y10b    = 0.
   dstdtc  = 0.
-  mn = 5
-  ida = 15
-  iyr = 2023
+  mn = 11
+  ida = 3
+  iyr = 2021
   ihro = 12
   mino = 0
   seco = 0
