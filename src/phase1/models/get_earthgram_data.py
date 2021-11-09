@@ -80,13 +80,13 @@ def get_earthgram_data(_balloon_state,_gram_grid):
     _grid_out = OutputGrid([],[],[],[],[],[],[],[],[])  # initialize output data object
 
     for i in range(len(output_txt)):        # find starting line to read data
-        if "Positions generated" in output_txt[i]:
-            start_line = i + 2
+        if "-----" in output_txt[i]:
+            start_line = i + 1
             break
         else:
-            start_line = 35
+            start_line = 21     # might want to make this backup more robust
 
-    for i in x:         # store desired output data
+    for i in range(len(_gram_grid.alt)):         # store desired output data
         temporary_var = output_txt[start_line + 13*i].split()
 
         _grid_out.alt.append(temporary_var[0])
