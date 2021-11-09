@@ -52,8 +52,11 @@ def RunningGram():
 
 
     #Waits and then closes the program,
-    while True:
+    time.sleep(3)
+    keyboard.press(Key.enter)
+    keyboard.release(Key.enter)
+    """while True:
         if os.path.isfile("earthgram/output.txt"): 
             keyboard.press(Key.enter)
             keyboard.release(Key.enter)
-            break
+            break"""
