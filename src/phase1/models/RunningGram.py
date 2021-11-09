@@ -15,7 +15,7 @@ from pynput.keyboard import Key, Controller as KeyboardController
 
 def RunningGram():
 
-    f = open("FilePaths.txt", "r")
+    f = open("earthgram/FilePaths.txt", "r")
 
     lines = f.readlines()
     f.close()
@@ -53,7 +53,7 @@ def RunningGram():
 
     #Waits and then closes the program,
     while True:
-        if os.path.isfile("output.txt"): 
+        if os.path.isfile("earthgram/output.txt"): 
             keyboard.press(Key.enter)
             keyboard.release(Key.enter)
             break

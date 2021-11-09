@@ -31,6 +31,9 @@ def get_earthgram_data(_balloon_state,_gram_grid):
 
 ## input file ##
 
+    # Change working directory to phase1/models
+    os.chdir('../phase1/models/')
+
     # open and read input file from repository
     f =  open("earthgram/InputFile.txt",'r')
     input_txt = f.readlines()
