@@ -69,15 +69,18 @@ def call_earthgram_func(current_point, current_vel, current_time):
     unit_radial = [i / pos_mag for i in current_point]
     vert_vel = np.dot(current_vel, unit_radial)
 
-    _balloon_state = BalloonState(current_time, lat, long, alt, vert_vel)
+    _balloon_state = BalloonState(current_time, lat, long, 5.0, vert_vel)
 
     grid = earthgram_points(current_point)
     grid_points = []
     for point in grid:
         _geocentric_astropy_obj = earth.EarthLocation.from_geocentric(point[0],point[1],point[2],unit='meter')
-        grid_points.append(_geocentric_astropy_obj.geodetic)
+        #grid_points.append(_geocentric_astropy_obj.geodetic)
+        grid_points.append([1,2,3])
     _gram_grid = GramGrid(grid_points[:][0], grid_points[:][1], grid_points[:][2])
 
+    print(_balloon_state.date_time, _balloon_state.vert_speed, _balloon_state.alt)
+    
     _grid_out = get_earthgram_data(_balloon_state, _gram_grid)
     # wind_vel = cardinal_to_cart(_grid_out)
     wind_vel = [_grid_out.vx, _grid_out.vy, _grid_out.vz]
