@@ -2,7 +2,7 @@
   atmpath = earthgram\IOfiles\
   NCEPpath = earthgram\NCEPdata\FixedBin\  
   trapath = earthgram\traj_file.txt
-  prtpath = earthgram\output.txt
+  prtpath = output.txt
   nprpath =  null
   conpath =  null
   rrapath = earthgram\RRAdata\
