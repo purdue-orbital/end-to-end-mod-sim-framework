@@ -85,19 +85,20 @@ def get_earthgram_data(_balloon_state,_gram_grid):
             break
         else:
             start_line = 21     # might want to make this backup more robust
+            print("Warning: get_earthgram_data had to default to select the default output start line.\n")
 
     for i in range(len(_gram_grid.alt)):         # store desired output data
         temporary_var = output_txt[start_line + 13*i].split()
 
-        _grid_out.alt.append(temporary_var[0])
-        _grid_out.lat.append(temporary_var[1])
-        _grid_out.long.append(temporary_var[2])
-        _grid_out.p.append(temporary_var[3])
-        _grid_out.rho.append(temporary_var[4])
-        _grid_out.temp.append(temporary_var[5])
-        _grid_out.vE.append(temporary_var[6])
-        _grid_out.vN.append(temporary_var[7])
-        _grid_out.vz.append(temporary_var[8])
+        _grid_out.alt.append(float(temporary_var[0]))
+        _grid_out.lat.append(float(temporary_var[1]))
+        _grid_out.long.append(float(temporary_var[2]))
+        _grid_out.p.append(float(temporary_var[3]))
+        _grid_out.rho.append(float(temporary_var[4]))
+        _grid_out.temp.append(float(temporary_var[5]))
+        _grid_out.vE.append(float(temporary_var[6]))
+        _grid_out.vN.append(float(temporary_var[7]))
+        _grid_out.vz.append(float(temporary_var[8]))
 
     return _grid_out
 
