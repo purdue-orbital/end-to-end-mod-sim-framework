@@ -78,15 +78,10 @@ def call_earthgram_func(current_point, current_vel, current_time):
         #grid_points.append(_geocentric_astropy_obj.geodetic)
         grid_points.append([1,2,3])
     _gram_grid = GramGrid(grid_points[:][0], grid_points[:][1], grid_points[:][2])
-
-    print(_balloon_state.date_time, _balloon_state.vert_speed, _balloon_state.alt)
     
     _grid_out = get_earthgram_data(_balloon_state, _gram_grid)
-    # wind_vel = cardinal_to_cart(_grid_out)
-    wind_vel = [_grid_out.vx, _grid_out.vy, _grid_out.vz]
-    atm_density = _grid_out.rho
     
-    return wind_vel, atm_density
+    return _grid_out
 
 
 def balloon_force_models(vel_vert, wind_vel, atm_density):
@@ -97,7 +92,7 @@ def balloon_force_models(vel_vert, wind_vel, atm_density):
 
     # Force calculations
     gravity = mass * 9.18
-    buoyancy = atm_density * balloon_volume
+    buoyancy = float(atm_density[0]) * balloon_volume
     drag_x = 0.5 * atm_density * wind_vel[1]^2 * coeff_drag * balloon_cross_area
     drag_y = 0.5 * atm_density * wind_vel[0]^2 * coeff_drag * balloon_cross_area
     drag_z = 0.5 * atm_density * (wind_vel[2] - vel_vert)^2 * coeff_drag * balloon_cross_area
@@ -132,7 +127,7 @@ def balloon_EOM(t, vars):
         earth_gram_data = call_earthgram_func(current_point, current_vel, current_time)
     
     #TODO: Build method to determine which point to use in earthgram data grid
-    wind_vel = [earth_gram_data.vx, earth_gram_data.vy, earth_gram_data.vz]
+    wind_vel = [earth_gram_data.vE, earth_gram_data.vN, earth_gram_data.vz]
     atm_density = earth_gram_data.rho
     
     accels = balloon_force_models(vars[5], wind_vel, atm_density)
