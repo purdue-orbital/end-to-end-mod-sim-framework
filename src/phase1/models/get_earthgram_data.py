@@ -72,14 +72,12 @@ def get_earthgram_data(_balloon_state,_gram_grid):
     RunningGram()
 
 ## output formatting ##
-    with open('earthgram/output.txt', newline = '') as f:     # open and read earthGRAM output file
+    with open('earthgram/output.txt', newline = '') as f:     # open and read EarthGRAM output file
 	    output_txt = f.readlines()
 
     temporary_var = []  # temporary variable for data storage in for loop
 
-    _grid_out = OutputGrid([],[],[],[],[],[],[],[],[])  # initialize output data object
-
-    for i in range(len(output_txt)):        # find starting line to read data
+    for i in range(len(output_txt)):        # find starting line to read data based on pattern in EarthGRAM output
         if "-----" in output_txt[i]:
             start_line = i + 1
             break
@@ -87,32 +85,32 @@ def get_earthgram_data(_balloon_state,_gram_grid):
             start_line = 21     # might want to make this backup more robust
             print("Warning: get_earthgram_data had to default to select the default output start line.\n")
 
+    grid_out_list = []  # initialize output data list
+
     for i in range(len(_gram_grid.alt)):         # store desired output data
-        temporary_var = output_txt[start_line + 13*i].split()
+        temporary_var = output_txt[start_line + 13*i].split()   # pull data from correct output text file lines
+        
+        floats = []
+        for val in temporary_var:
+            floats.append(float(val))   # convert strings to floats
 
-        _grid_out.alt.append(float(temporary_var[0]))
-        _grid_out.lat.append(float(temporary_var[1]))
-        _grid_out.long.append(float(temporary_var[2]))
-        _grid_out.p.append(float(temporary_var[3]))
-        _grid_out.rho.append(float(temporary_var[4]))
-        _grid_out.temp.append(float(temporary_var[5]))
-        _grid_out.vE.append(float(temporary_var[6]))
-        _grid_out.vN.append(float(temporary_var[7]))
-        _grid_out.vz.append(float(temporary_var[8]))
+        # append current point's data to output list
+        grid_out_list.append(OutputGrid(floats[0],floats[1],floats[2],floats[3],floats[4],floats[5],floats[6],floats[7],floats[8]))
 
-    return _grid_out
+    return grid_out_list
 
+## output data class ##
 @dataclass
 class OutputGrid:
     """
     Creates data structure class to organize earthGRAM output data into an output object
     """
+    alt: ty.List[float]
     lat: ty.List[float]
     long: ty.List[float]
-    alt: ty.List[float]
+    p: ty.List[float]
+    rho: ty.List[float]
+    temp: ty.List[float]
     vE: ty.List[float]
     vN: ty.List[float]
     vz: ty.List[float]
-    rho: ty.List[float]
-    temp: ty.List[float]
-    p: ty.List[float]
