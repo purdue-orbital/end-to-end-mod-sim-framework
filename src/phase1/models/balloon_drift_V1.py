@@ -8,6 +8,7 @@ import scipy.integrate as integrate
 import typing as ty
 from balloonEphemerisWriter import balloonEphemerisWriter
 from get_earthgram_data import get_earthgram_data
+import sys
 
 
 def cardinal_to_cart(_grid_out):
@@ -23,6 +24,7 @@ def cardinal_to_cart(_grid_out):
     format [[x,y,z],[x,y,z],...] corresponding to the grid order 
     """
     for i in range(len(_grid_out.lat)):
+        #TODO: create logic to convert from lat long to ECEF xyz (probably in astropy already)
         pass
     wind_vel_cart = 0
 
@@ -44,7 +46,8 @@ def earthgram_points(current_point):
 
     # Simple straight line of points going up in increments of 10 meters up to 50 meters
     for i in range(6):
-        grid.append([current_point[0], current_point[1] + i * 10, current_point[2]])    
+        grid.append([current_point[0], current_point[1] + i * 10, current_point[2]])
+        #TODO: Create a more complex gridding shape
 
     return grid
 
@@ -109,24 +112,13 @@ def balloon_force_models(vel_vert, wind_vel, atm_density):
     return accels
 
 
-def balloon_EOM(t, vars):
+def balloon_EOM(t, vars, earth_gram_data):
     """
     Function to be numerically integrated.
     Contains state variable assignments 
     and calls to force model functions.
     """
     
-    current_point = np.array(vars[0:3])
-    current_vel = np.array(vars[3:6])
-    current_time = launch_time + datetime.timedelta(seconds=t)
-
-    #TODO: Build function to check if balloon is outside of earthgram data grid
-    out_of_bounds = 1
-
-    if out_of_bounds == 1:
-        earth_gram_data = call_earthgram_func(current_point, current_vel, current_time)
-    
-    #TODO: Build method to determine which point to use in earthgram data grid
     wind_vel = [earth_gram_data.vE, earth_gram_data.vN, earth_gram_data.vz]
     atm_density = earth_gram_data.rho
     
@@ -176,15 +168,49 @@ def balloon_model_V1(inputs):
 
     # Give the balloon data object a short handle (name) for easy future reference
     dat = balloon_data
+    
+    current_point = np.array(dat.pos_vel[0:3])
+    current_vel = np.array(dat.pos_vel[3:6])
+    current_time = launch_time
+    earth_gram_data_list = call_earthgram_func(current_point, current_vel, current_time)
 
     # Create an "integration object" of the SciPy libraries RK45 numerical integrator class
-    # Provide the integrator the function to be run, initial pos_vel, and integration time
-    integration_obj = integrate.RK45(balloon_EOM, 0, dat.pos_vel, dat.duration)
+    # Provide the integrator the function to be run, initial pos_vel, and integration time, as well as the first earthgram data object
+    integration_obj = integrate.RK45(balloon_EOM, 0, dat.pos_vel, dat.duration, args=(earth_gram_data_list[0]))
 
     # While the integration is still running, continue to step through integration
     while integration_obj.status == 'running':
         # Integrator chooses a step time dynamically based on observed patterns
         integration_obj.step()
+
+        # Determine if our current location is still within or close enough to data grid, if not, get new data
+        if np.linalg.norm(integration_obj.y) > 0:
+            #TODO: Build function to check if balloon is outside of earthgram data grid
+            out_of_bounds = 1
+
+        # If outside of grid bounds, call earthgram function and get updated data grid
+        if out_of_bounds == 1:
+            current_point = np.array(integration_obj.y[0:3])
+            current_vel = np.array(integration_obj.y[3:6])
+            current_time = launch_time + datetime.timedelta(seconds=integration_obj.t)
+            earth_gram_data_list = call_earthgram_func(current_point, current_vel, current_time)
+        
+        # Iterate through list of grid objects where each object contains data at a point
+        for gram_data_obj in earth_gram_data_list:
+            pass
+            #TODO: Build method to determine which point to use in earthgram data grid
+        
+        # Once closest data point is found, set a temp variable containing the object
+        closest_earth_gram_data = earth_gram_data_list[0]
+
+        # Set this closest earthgram data object as the new arg to the integration function
+        integration_obj.args = closest_earth_gram_data
+        
+        """
+        print(closest_earth_gram_data)
+        sys.exit()
+        """
+        
         # At each time step, store the current state and time and append to ephemeris data struct
         dat.pos_vel = np.append(dat.pos_vel, integration_obj.y)
         dat.time = np.append(dat.time, integration_obj.t)

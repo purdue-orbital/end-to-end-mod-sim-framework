@@ -55,7 +55,7 @@ def user_input_terminal():
         inputs.launch_location_cart = inputs.lla_to_cartesian()
     
     # Set initial velocity to assume zero in all directions
-    init_vel = [0, 0, 0]
+    init_vel = [0, 0, 1]
 
     # append position and velocity vectors to create initial state vector
     inputs.launch_init_state = inputs.launch_location_cart + init_vel
