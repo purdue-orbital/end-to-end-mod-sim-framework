@@ -78,12 +78,16 @@ def get_earthgram_data(_balloon_state,_gram_grid):
     temporary_var = []  # temporary variable for data storage in for loop
 
     for i in range(len(output_txt)):        # find starting line to read data based on pattern in EarthGRAM output
-        if "-----" in output_txt[i]:
+        if "---------" in output_txt[i]:
             start_line = i + 1
+            trigger = 0
             break
         else:
             start_line = 21     # might want to make this backup more robust
-            print("Warning: get_earthgram_data had to default to select the default output start line.\n")
+            trigger = 1
+    
+    if trigger == 1:
+        print("Warning: get_earthgram_data had to default to select the default output start line.\n")
 
     grid_out_list = []  # initialize output data list
 
@@ -91,7 +95,7 @@ def get_earthgram_data(_balloon_state,_gram_grid):
         temporary_var = output_txt[start_line + 13*i].split()   # pull data from correct output text file lines
         
         floats = []
-        for val in temporary_var:
+        for val in temporary_var[0:9]:
             floats.append(float(val))   # convert strings to floats
 
         # append current point's data to output list
