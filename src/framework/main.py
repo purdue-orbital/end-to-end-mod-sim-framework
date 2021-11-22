@@ -10,7 +10,6 @@ import sys
 sys.path.append('../phase1/models/')
 sys.path.append('../phase2/models/')
 sys.path.append('../phase3/models/')
-sys.path.append('C:/git/EarthGRAM2016Version2.0/MyTest/')
 import user_input
 from balloon_drift_V1 import balloon_model_V1
 
@@ -149,7 +148,7 @@ if "__main__":
         # If run was successful, provide relevant information to user
         elif final_balloon_data.model_run_status == 'Success':
             print("\nRun succeeded!")
-            print("\nAt time {} mins balloon is:".format(final_balloon_data.current_time/60))
+            print("\nAfter {} mins balloon is:".format(final_balloon_data.current_time/60))
             print("x-position = {} km".format(final_balloon_data.current_pos_vel[0]/1000))
             print("y-position = {} km".format(final_balloon_data.current_pos_vel[1]/1000))
             print("z-position = {} km".format(final_balloon_data.current_pos_vel[2]/1000))

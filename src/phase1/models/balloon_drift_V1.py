@@ -8,25 +8,24 @@ import scipy.integrate as integrate
 import typing as ty
 from balloonEphemerisWriter import balloonEphemerisWriter
 from get_earthgram_data import get_earthgram_data
+import sys
 
 
-def cardinal_to_cart(_grid_out):
-    """
-    Description: Function to rotate vector from cardinal frame (r, N, E)
-    to cartesian frame (x, y, z)
-
-    Inputs:
-    - _grid_out: object containing earthgram data corresponding to current grid
-
-    Outputs:
-    - wind_vel_cart: a list of wind velocities in the cartesian frame in the
-    format [[x,y,z],[x,y,z],...] corresponding to the grid order 
-    """
-    for i in range(len(_grid_out.lat)):
-        pass
-    wind_vel_cart = 0
-
-    return wind_vel_cart
+def enu2xyz(enu_position):
+  """
+  Convert east, north, up coordinates (labeled e, n, u) to ECEF coordinates.
+  The reference point (phi, lambda, h) must be given. All distances are in metres
+  """
+ 
+  origin_ecef =  cape_cart_m  # Location of Cape Canaveral in ECEF meters
+  [refLat, refLong] =  cape_lla_deg[0:2]
+  [e, n, u] = enu_position
+ 
+  X = -np.sin(refLong)*e - np.cos(refLong)*np.sin(refLat)*n + np.cos(refLong)*np.cos(refLat)*u + origin_ecef[0]
+  Y = np.cos(refLong)*e - np.sin(refLong)*np.sin(refLat)*n + np.cos(refLat)*np.sin(refLong)*u + origin_ecef[1]
+  Z = np.cos(refLat)*n + np.sin(refLat)*u + origin_ecef[2]
+  
+  return [X, Y, Z]
 
 
 def earthgram_points(current_point):
@@ -44,12 +43,13 @@ def earthgram_points(current_point):
 
     # Simple straight line of points going up in increments of 10 meters up to 50 meters
     for i in range(6):
-        grid.append([current_point[0], current_point[1] + i * 10, current_point[2]])    
+        grid.append([current_point[0], current_point[1] + i * 10, current_point[2]])
+        #TODO: Create a more complex gridding shape
 
     return grid
 
 
-def call_earthgram_func(current_point, current_vel, current_time):
+def call_earthgram_func(current_point_local, current_vel, current_time):
     """
     Description: Function to organize data and call function to fetch EarthGRAM data
 
@@ -62,6 +62,7 @@ def call_earthgram_func(current_point, current_vel, current_time):
     - wind_vel: wind velocity [N-S, E-W, Radial] in a list
     - atm_density: atmospheric density as a float
     """
+    current_point = enu2xyz(current_point_local)
 
     _geocentric_astropy_obj = earth.EarthLocation.from_geocentric(current_point[0],current_point[1],current_point[2],unit='meter')
     lat, long, alt = _geocentric_astropy_obj.geodetic
@@ -69,42 +70,50 @@ def call_earthgram_func(current_point, current_vel, current_time):
     unit_radial = [i / pos_mag for i in current_point]
     vert_vel = np.dot(current_vel, unit_radial)
 
-    _balloon_state = BalloonState(current_time, lat, long, alt, vert_vel)
+    _balloon_state = BalloonState(current_time, lat, long, alt.value, vert_vel)
 
     grid = earthgram_points(current_point)
     grid_points = []
     for point in grid:
         _geocentric_astropy_obj = earth.EarthLocation.from_geocentric(point[0],point[1],point[2],unit='meter')
-        grid_points.append(_geocentric_astropy_obj.geodetic)
+        temp = _geocentric_astropy_obj.geodetic
+        grid_points.append([temp.lon.value,temp.lat.value,temp.height.value])
+        
     _gram_grid = GramGrid(grid_points[:][0], grid_points[:][1], grid_points[:][2])
-
-    _grid_out = get_earthgram_data(_balloon_state, _gram_grid)
-    # wind_vel = cardinal_to_cart(_grid_out)
-    wind_vel = [_grid_out.vx, _grid_out.vy, _grid_out.vz]
-    atm_density = _grid_out.rho
     
-    return wind_vel, atm_density
+    _grid_out = get_earthgram_data(_balloon_state, _gram_grid)
+    
+    return _grid_out
 
 
-def balloon_force_models(vel_vert, wind_vel, atm_density):
+def balloon_force_models(balloon_vel, wind_vel, atm_density):
     """
     Function to define and calculate
     forces acting on balloon system
     """
+    # Calculate wind velocities relative to the balloon
+    rel_vel_x = balloon_vel[0] - wind_vel[0]
+    rel_vel_y = balloon_vel[1] - wind_vel[1]
+    rel_vel_z = balloon_vel[2] - wind_vel[2]
+    
+    # Calculate directionality of wind velocities to overcome square of velocity term
+    rel_vel_x_dir = np.sign(rel_vel_x)
+    rel_vel_y_dir = np.sign(rel_vel_y)
+    rel_vel_z_dir = np.sign(rel_vel_z)
 
     # Force calculations
-    gravity = mass * 9.18
-    buoyancy = atm_density * balloon_volume
-    drag_x = 0.5 * atm_density * wind_vel[1]^2 * coeff_drag * balloon_cross_area
-    drag_y = 0.5 * atm_density * wind_vel[0]^2 * coeff_drag * balloon_cross_area
-    drag_z = 0.5 * atm_density * (wind_vel[2] - vel_vert)^2 * coeff_drag * balloon_cross_area
+    gravity = mass * 9.81
+    buoyancy = float(atm_density) * balloon_volume
+    drag_x = 0.5 * atm_density * np.square(rel_vel_x) * rel_vel_x_dir * coeff_drag * balloon_cross_area
+    drag_y = 0.5 * atm_density * np.square(rel_vel_y) * rel_vel_y_dir * coeff_drag * balloon_cross_area
+    drag_z = 0.5 * atm_density * np.square(rel_vel_z) * rel_vel_z_dir * coeff_drag * balloon_cross_area
 
     # accels is the acceleration in [x, y, z]
     accels = [0, 0, 0]
     # Acceleration in x-direction 
-    accels[0] = drag_x / mass
+    accels[0] = -drag_x / mass
     # Acceleration in y-direction 
-    accels[1] = drag_y / mass
+    accels[1] = -drag_y / mass
     # Acceleration in z-direction 
     accels[2] = (buoyancy - gravity - drag_z) / mass 
 
@@ -118,21 +127,10 @@ def balloon_EOM(t, vars):
     and calls to force model functions.
     """
     
-    current_point = np.array(vars[0:3])
-    current_vel = np.array(vars[3:6])
-    current_time = launch_time + datetime.timedelta(seconds=t)
-
-    #TODO: Build function to check if balloon is outside of earthgram data grid
-    out_of_bounds = 1
-
-    if out_of_bounds == 1:
-        earth_gram_data = call_earthgram_func(current_point, current_vel, current_time)
+    wind_vel = [closest_earth_gram_data.vE, closest_earth_gram_data.vN, closest_earth_gram_data.vz]
+    atm_density = closest_earth_gram_data.rho
     
-    #TODO: Build method to determine which point to use in earthgram data grid
-    wind_vel = [earth_gram_data.vx, earth_gram_data.vy, earth_gram_data.vz]
-    atm_density = earth_gram_data.rho
-    
-    accels = balloon_force_models(vars[5], wind_vel, atm_density)
+    accels = balloon_force_models(vars[3:6], wind_vel, atm_density)
 
     # First three values: vx, vy, vz [m/s]
     # Second three values: ax, ay, az [m/s^2]
@@ -164,9 +162,9 @@ def balloon_model_V1(inputs):
     """
 
     # Define global variables
-    global mass, coeff_drag, balloon_cross_area, balloon_volume, launch_time, EARTH_RADIUS
-    mass, coeff_drag, balloon_cross_area, balloon_volume, launch_time = inputs.constants
-    EARTH_RADIUS = 6373.455
+    global mass, coeff_drag, balloon_cross_area, balloon_volume, launch_time, cape_cart_m, cape_lla_deg, EARTH_RADIUS
+    mass, coeff_drag, balloon_cross_area, balloon_volume, launch_time, cape_cart_m, cape_lla_deg = inputs.constants
+    EARTH_RADIUS = 6373.455 * 1000
 
     # Initialize an instance of the data class to store data
     balloon_data = EphemerisDataStruct_Balloon()
@@ -178,19 +176,61 @@ def balloon_model_V1(inputs):
 
     # Give the balloon data object a short handle (name) for easy future reference
     dat = balloon_data
+    
+    current_point = np.array(dat.pos_vel[0:3])
+    current_vel = np.array(dat.pos_vel[3:6])
+    current_time = launch_time
+    earth_gram_data_list = call_earthgram_func(current_point, current_vel, current_time)
+    
+    # Once closest data point is found, set a temp variable containing the object
+    global closest_earth_gram_data
+    closest_earth_gram_data = earth_gram_data_list[0]
+    last_alt = 0
+    out_of_bounds = 0
 
     # Create an "integration object" of the SciPy libraries RK45 numerical integrator class
-    # Provide the integrator the function to be run, initial pos_vel, and integration time
+    # Provide the integrator the function to be run, initial pos_vel, and integration time, as well as the first earthgram data object
     integration_obj = integrate.RK45(balloon_EOM, 0, dat.pos_vel, dat.duration)
 
     # While the integration is still running, continue to step through integration
     while integration_obj.status == 'running':
         # Integrator chooses a step time dynamically based on observed patterns
         integration_obj.step()
+        print('\n\nCurrent Time: {}'.format(integration_obj.t))
+        print('Time Left: {}'.format(dat.duration - integration_obj.t))
+        print('Alt [meters]: {}'.format(integration_obj.y[2]))
+        print('z-velocity [m/s]: {}'.format(integration_obj.y[5]))
+
+        # Determine if our current location is still within or close enough to data grid, if not, get new data
+        if abs(integration_obj.y[2] - last_alt) > 1000:
+            #TODO: Build function to check if balloon is outside of earthgram data grid
+            out_of_bounds = 1
+            last_alt = integration_obj.y[2]
+
+        # If outside of grid bounds, call earthgram function and get updated data grid
+        if out_of_bounds == 1:
+            current_point = np.array(integration_obj.y[0:3])
+            current_vel = np.array(integration_obj.y[3:6])
+            current_time = launch_time + datetime.timedelta(seconds=integration_obj.t)
+            earth_gram_data_list = call_earthgram_func(current_point, current_vel, current_time)
+            out_of_bounds = 0
+        
+        # Iterate through list of grid objects where each object contains data at a point
+        for gram_data_obj in earth_gram_data_list:
+            pass
+            #TODO: Build method to determine which point to use in earthgram data grid
+        
+        """
+        print(closest_earth_gram_data)
+        sys.exit()
+        """
+        
         # At each time step, store the current state and time and append to ephemeris data struct
         dat.pos_vel = np.append(dat.pos_vel, integration_obj.y)
         dat.time = np.append(dat.time, integration_obj.t)
-
+        
+    print('\nFinal Integration Status: {}'.format(integration_obj.status))
+    
     # Once the integration is done, reshape the data struct to an n x 6 where n is the number of time steps
     dat.pos_vel = dat.pos_vel.reshape((int(len(dat.pos_vel)/6), 6))
 

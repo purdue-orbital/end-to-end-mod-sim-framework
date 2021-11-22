@@ -31,14 +31,20 @@ def get_earthgram_data(_balloon_state,_gram_grid):
 
 ## input file ##
 
+    try:
+        os.chdir('../phase1/models/')
+    except:
+        'Already in correct directory'
+        
+
     # open and read input file from repository
-    f =  open("InputFile.txt",'r')
+    f =  open("earthgram/InputFile.txt",'r')
     input_txt = f.readlines()
     f.close()
 
-    os.remove("InputFile.txt")      # remove original file
+    os.remove("earthgram/InputFile.txt")      # remove original file
 
-    f = open("InputFile.txt",'w')   # create new file
+    f = open("earthgram/InputFile.txt",'w')   # create new file
 
     # update starting date and time
     input_txt[23] = f'  mn = {_balloon_state.date_time.month}\n'
@@ -59,7 +65,7 @@ def get_earthgram_data(_balloon_state,_gram_grid):
     for x in _gram_grid.alt:
         elapsed_time.append((x - _balloon_state.alt)*1000/_balloon_state.vert_speed)
     
-    with open('traj_file.txt','w') as f:    # open text file
+    with open('earthgram/traj_file.txt','w') as f:    # open text file
         f.writelines('')                    # clear file content
         for i in range(len(_gram_grid.alt)):     # write trajectory file in format accepted by EarthGRAM
             f.write("{}\t{}\t{}\t{}\n".format(elapsed_time[i],_gram_grid.alt[i],_gram_grid.lat[i],_gram_grid.long[i]))
@@ -69,46 +75,49 @@ def get_earthgram_data(_balloon_state,_gram_grid):
     RunningGram()
 
 ## output formatting ##
-    with open('output.txt', newline = '') as f:     # open and read earthGRAM output file
+    with open('earthgram/output.txt', newline = '') as f:     # open and read EarthGRAM output file
 	    output_txt = f.readlines()
 
     temporary_var = []  # temporary variable for data storage in for loop
 
-    _grid_out = OutputGrid([],[],[],[],[],[],[],[],[])  # initialize output data object
-
-    for i in range(len(output_txt)):        # find starting line to read data
-        if "Positions generated" in output_txt[i]:
-            start_line = i + 2
+    for i in range(len(output_txt)):        # find starting line to read data based on pattern in EarthGRAM output
+        if "---------" in output_txt[i]:
+            start_line = i + 1
+            trigger = 0
             break
         else:
-            start_line = 35
+            start_line = 21     # might want to make this backup more robust
+            trigger = 1
+    
+    if trigger == 1:
+        print("Warning: get_earthgram_data had to default to select the default output start line.\n")
 
-    for i in x:         # store desired output data
-        temporary_var = output_txt[start_line + 13*i].split()
+    grid_out_list = []  # initialize output data list
 
-        _grid_out.alt.append(temporary_var[0])
-        _grid_out.lat.append(temporary_var[1])
-        _grid_out.long.append(temporary_var[2])
-        _grid_out.p.append(temporary_var[3])
-        _grid_out.rho.append(temporary_var[4])
-        _grid_out.temp.append(temporary_var[5])
-        _grid_out.vE.append(temporary_var[6])
-        _grid_out.vN.append(temporary_var[7])
-        _grid_out.vz.append(temporary_var[8])
+    for i in range(len(_gram_grid.alt)):         # store desired output data
+        temporary_var = output_txt[start_line + 13*i].split()   # pull data from correct output text file lines
+        
+        floats = []
+        for val in temporary_var[0:9]:
+            floats.append(float(val))   # convert strings to floats
 
-    return _grid_out
+        # append current point's data to output list
+        grid_out_list.append(OutputGrid(floats[0],floats[1],floats[2],floats[3],floats[4],floats[5],floats[6],floats[7],floats[8]))
 
+    return grid_out_list
+
+## output data class ##
 @dataclass
 class OutputGrid:
     """
     Creates data structure class to organize earthGRAM output data into an output object
     """
+    alt: ty.List[float]
     lat: ty.List[float]
     long: ty.List[float]
-    alt: ty.List[float]
+    p: ty.List[float]
+    rho: ty.List[float]
+    temp: ty.List[float]
     vE: ty.List[float]
     vN: ty.List[float]
     vz: ty.List[float]
-    rho: ty.List[float]
-    temp: ty.List[float]
-    p: ty.List[float]

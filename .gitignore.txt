@@ -1,0 +1,11 @@
+src/phase1/models/earthgram/Documentation/
+src/phase1/models/earthgram/IOFiles/
+src/phase1/models/earthgram/MyTest/
+src/phase1/models/earthgram/NCEPdata/
+src/phase1/models/earthgram/PC Executables/
+src/phase1/models/earthgram/RRAdata/
+src/phase1/models/earthgram/Source/
+src/phase1/models/earthgram/Source1/
+src/phase1/models/earthgram/GRAM2016.exe
+src/phase1/models/earthgram/BLTest.txt
+src/phase1/models/earthgram/null
