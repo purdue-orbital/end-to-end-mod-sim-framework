@@ -16,7 +16,7 @@ def balloonEphemerisWriter(propStartDate, ephemStates, ephemTimes, fname, stk_fr
     
         EphemerisTimePosVel	"""
 
-    with open(f"../phase1/models/{fname}.e", "w") as f:
+    with open(f"{fname}.e", "w") as f:
         f.write(ephemHeader)
         f.write("\n")
         for i, point in enumerate(ephemStates):

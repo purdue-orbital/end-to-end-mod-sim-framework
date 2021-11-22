@@ -148,7 +148,7 @@ if "__main__":
         # If run was successful, provide relevant information to user
         elif final_balloon_data.model_run_status == 'Success':
             print("\nRun succeeded!")
-            print("\nAt time {} mins balloon is:".format(final_balloon_data.current_time/60))
+            print("\nAfter {} mins balloon is:".format(final_balloon_data.current_time/60))
             print("x-position = {} km".format(final_balloon_data.current_pos_vel[0]/1000))
             print("y-position = {} km".format(final_balloon_data.current_pos_vel[1]/1000))
             print("z-position = {} km".format(final_balloon_data.current_pos_vel[2]/1000))
