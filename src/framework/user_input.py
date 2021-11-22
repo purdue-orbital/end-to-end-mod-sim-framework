@@ -32,19 +32,22 @@ def user_input_terminal():
     # Initial time
     init_time = '6 Aug 2021 23:59:42.000000'
     launch_time = t.datetime(2023, 5, 15, 12, 0, 0)
-
-    # Constant values [mass [kg], coefficient of drag, cross-sectional balloon area [m^2]]
-    constants = [200.0, 0.5, 30.0, 115.0, launch_time]
-
+    
     # Lat/Long/Alt of Cape Canaveral
     cape_lla_deg = [28.3922, -80.6077, 0]
-
     # Cartesian Position for Cape Canaveral (from STK)
     cape_cart_km = [916.357, -5539.88, 3014.8]
     cape_cart_m = [i * 1000 for i in cape_cart_km]
 
+    # Constant values [mass [kg], coefficient of drag, cross-sectional balloon area [m^2], balloon volume [m^3], time of launch, location of launch]
+    # From google drive, prelim Raven specs say diameter of 61.5 ft for 205 lb system (160 lb payload, 45 lb balloon)
+    radius = 9.3845 # meters
+    area = np.square(radius)*np.pi
+    volume = 4/3*np.pi*np.power(radius,3)
+    constants = [93, 0.5, area, volume, launch_time, cape_cart_m, cape_lla_deg]
+
     # Fake Data to test inputs
-    inputs = InputStructure(25000.0, cape_cart_m, 'Cartesian', init_time, 3600, 1, 'historical', constants)
+    inputs = InputStructure(25000.0, [0, 0, 0], 'Cartesian', init_time, 3600, 1, 'historical', constants)
 
     # If inputs are Cartesian then directly translate
     if inputs.launch_location_type == 'Cartesian':

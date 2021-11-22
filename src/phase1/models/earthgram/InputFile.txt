@@ -25,8 +25,8 @@
   ida = 15
   iyr = 2023
   ihro = 12
-  mino = 0
-  seco = 0
+  mino = 58
+  seco = 51
   dphi = 0.4
   dthet = 1.2
   dhgt = 0.5
