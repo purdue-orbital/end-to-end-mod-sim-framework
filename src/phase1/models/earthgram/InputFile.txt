@@ -1,7 +1,7 @@
  $namein_e10
   atmpath = earthgram\IOfiles\
   NCEPpath = earthgram\NCEPdata\FixedBin\  
-  trapath = earthgram\traj_file.txt
+  trapath = traj_file.txt
   prtpath = output.txt
   nprpath =  null
   conpath =  null
@@ -21,18 +21,18 @@
   y10     = 0.
   y10b    = 0.
   dstdtc  = 0.
-  mn = 5
-  ida = 15
-  iyr = 2023
-  ihro = 12
-  mino = 58
-  seco = 51
+  mn = 12
+  ida = 1
+  iyr = 2021
+  ihro = 0
+  mino = 59
+  seco = 48
   dphi = 0.4
   dthet = 1.2
   dhgt = 0.5
   nmax = 51
   delt = 60.0
-  iopt = 0
+  iopt = 1
   iaux = 0
   iprt = 1
   inpr = 1
