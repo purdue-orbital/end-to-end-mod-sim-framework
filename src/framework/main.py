@@ -12,6 +12,9 @@ sys.path.append('../phase2/models/')
 sys.path.append('../phase3/models/')
 import user_input
 from balloon_drift_V1 import balloon_model_V1
+from balloonEphemerisWriter import balloonEphemerisWriter
+from importlib.machinery import SourceFileLoader
+datetime2STK = SourceFileLoader('datetime2STK', 'helper_functions/datetime2STK.py').load_module()
 
 
 def single_run_launch_platform_3dof(inputs):
@@ -85,12 +88,28 @@ def single_run_orbit_propagation():
     return outputs
 
 
-def dispersion_analysis():
+def dispersion_analysis(inputs):
     
-    # TODO: develop logic to run a set of models in sequence, randomly varying all relevant parameters
+    dates = ['1 Jan 2021 00:00:00.000000',
+             '1 Feb 2021 00:00:00.000000',
+             '1 Mar 2021 00:00:00.000000',
+             '1 Apr 2021 00:00:00.000000',
+             '1 May 2021 00:00:00.000000',
+             '1 Jun 2021 00:00:00.000000',
+             '1 Jul 2021 00:00:00.000000',
+             '1 Aug 2021 00:00:00.000000',
+             '1 Sep 2021 00:00:00.000000',
+             '1 Oct 2021 00:00:00.000000',
+             '1 Nov 2021 00:00:00.000000',
+             '1 Dec 2021 00:00:00.000000']             
 
-    outputs = 1
-    return outputs
+    for i in range(len(dates)):
+        inputs.launch_date = datetime2STK.UTCG2datetime(dates[i])
+        final_balloon_data, balloon_ephemeris = single_run_launch_platform_3dof(inputs)
+        balloonEphemerisWriter(inputs.launch_date, balloon_ephemeris.pos_vel, balloon_ephemeris.time, 'balloon_ephem_'+str(i),'Custom TopoCentric Facility/Launch')
+        print('\nRun '+str(i)+' is complete')
+
+    return balloon_ephemeris
 
 
 def trade_study_XXX():
@@ -142,6 +161,8 @@ if "__main__":
     if inputs.mode == 1:
         # Assign the returned data from function to data structs
         final_balloon_data, balloon_ephemeris = single_run_launch_platform_3dof(inputs)
+        # Finally, send the full ephemeris data to function to create a balloon.e file for STK visualization
+        balloonEphemerisWriter(inputs.launch_date, balloon_ephemeris.pos_vel, balloon_ephemeris.time, 'balloon','Custom TopoCentric Facility/Launch')
         # If run failed, alert user
         if final_balloon_data.model_run_status == 'Failed':
             print('Run failed!')
@@ -155,3 +176,7 @@ if "__main__":
             print("x-velocity = {} m/s".format(final_balloon_data.current_pos_vel[3]))
             print("y-velocity = {} m/s".format(final_balloon_data.current_pos_vel[4]))
             print("z-velocity = {} m/s".format(final_balloon_data.current_pos_vel[5]))
+            
+    elif inputs.mode == 2:
+        # Run sequence of runs
+        balloon_ephemeris = dispersion_analysis(inputs)

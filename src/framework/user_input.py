@@ -3,6 +3,8 @@ import datetime as t
 from dataclasses import dataclass
 import typing as ty
 import math
+from importlib.machinery import SourceFileLoader
+datetime2STK = SourceFileLoader('datetime2STK', 'helper_functions/datetime2STK.py').load_module()
 
 
 def user_input():
@@ -29,9 +31,14 @@ def user_input_gui():
 
 def user_input_terminal():
     
+    # Select the run mode
+    # Mode = 1: Single balloon run
+    # Mode = 2: Multiple balloon runs spread out through the year
+    mode = 2
+    
     # Initial time
-    init_time = '6 Aug 2021 23:59:42.000000'
-    launch_time = t.datetime(2023, 5, 15, 12, 0, 0)
+    init_time = '15 May 2023 12:00:00.000000'
+    launch_time = datetime2STK.UTCG2datetime(init_time)
     
     # Lat/Long/Alt of Cape Canaveral
     cape_lla_deg = [28.3922, -80.6077, 0]
@@ -47,7 +54,7 @@ def user_input_terminal():
     constants = [93, 0.5, area, volume, launch_time, cape_cart_m, cape_lla_deg]
 
     # Fake Data to test inputs
-    inputs = InputStructure(25000.0, [0, 0, 0], 'Cartesian', init_time, 3600, 1, 'historical', constants)
+    inputs = InputStructure(25000.0, [0, 0, 0], 'Cartesian', launch_time, 3600, mode, 'historical', constants)
 
     # If inputs are Cartesian then directly translate
     if inputs.launch_location_type == 'Cartesian':

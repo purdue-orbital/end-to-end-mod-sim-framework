@@ -6,7 +6,6 @@ from dataclasses import dataclass
 import datetime
 import scipy.integrate as integrate
 import typing as ty
-from balloonEphemerisWriter import balloonEphemerisWriter
 from get_earthgram_data import get_earthgram_data
 import sys
 
@@ -72,15 +71,20 @@ def call_earthgram_func(current_point_local, current_vel, current_time):
 
     _balloon_state = BalloonState(current_time, lat, long, alt.value, vert_vel)
 
-    grid = earthgram_points(current_point)
-    grid_points = []
-    for point in grid:
-        _geocentric_astropy_obj = earth.EarthLocation.from_geocentric(point[0],point[1],point[2],unit='meter')
-        temp = _geocentric_astropy_obj.geodetic
-        grid_points.append([temp.lon.value,temp.lat.value,temp.height.value])
-        
-    _gram_grid = GramGrid(grid_points[:][0], grid_points[:][1], grid_points[:][2])
+    #TODO: Fix grid creation in LLA/Cart context
+    # grid = earthgram_points(current_point)
     
+    _gram_grid = GramGrid([], [], [])
+    for i in range(6):
+        _geocentric_astropy_obj = earth.EarthLocation.from_geocentric(current_point[0],current_point[1],current_point[2],unit='meter')
+        temp = _geocentric_astropy_obj.geodetic
+        _gram_grid.long.append(temp.lon.value)
+        _gram_grid.lat.append(temp.lat.value)
+        if temp.height.value < 0:
+            _gram_grid.alt.append((0 + i*100)/1000)
+        else:
+            _gram_grid.alt.append((temp.height.value + i*100)/1000)
+
     _grid_out = get_earthgram_data(_balloon_state, _gram_grid)
     
     return _grid_out
@@ -179,7 +183,7 @@ def balloon_model_V1(inputs):
     
     current_point = np.array(dat.pos_vel[0:3])
     current_vel = np.array(dat.pos_vel[3:6])
-    current_time = launch_time
+    current_time = inputs.launch_date
     earth_gram_data_list = call_earthgram_func(current_point, current_vel, current_time)
     
     # Once closest data point is found, set a temp variable containing the object
@@ -196,13 +200,9 @@ def balloon_model_V1(inputs):
     while integration_obj.status == 'running':
         # Integrator chooses a step time dynamically based on observed patterns
         integration_obj.step()
-        print('\n\nCurrent Time: {}'.format(integration_obj.t))
-        print('Time Left: {}'.format(dat.duration - integration_obj.t))
-        print('Alt [meters]: {}'.format(integration_obj.y[2]))
-        print('z-velocity [m/s]: {}'.format(integration_obj.y[5]))
-
+        
         # Determine if our current location is still within or close enough to data grid, if not, get new data
-        if abs(integration_obj.y[2] - last_alt) > 1000:
+        if abs(integration_obj.y[2] - last_alt) > 100:
             #TODO: Build function to check if balloon is outside of earthgram data grid
             out_of_bounds = 1
             last_alt = integration_obj.y[2]
@@ -211,19 +211,15 @@ def balloon_model_V1(inputs):
         if out_of_bounds == 1:
             current_point = np.array(integration_obj.y[0:3])
             current_vel = np.array(integration_obj.y[3:6])
-            current_time = launch_time + datetime.timedelta(seconds=integration_obj.t)
+            current_time = inputs.launch_date + datetime.timedelta(seconds=integration_obj.t)
             earth_gram_data_list = call_earthgram_func(current_point, current_vel, current_time)
+            closest_earth_gram_data = earth_gram_data_list[0]
             out_of_bounds = 0
         
         # Iterate through list of grid objects where each object contains data at a point
         for gram_data_obj in earth_gram_data_list:
-            pass
+            pass            
             #TODO: Build method to determine which point to use in earthgram data grid
-        
-        """
-        print(closest_earth_gram_data)
-        sys.exit()
-        """
         
         # At each time step, store the current state and time and append to ephemeris data struct
         dat.pos_vel = np.append(dat.pos_vel, integration_obj.y)
@@ -233,9 +229,6 @@ def balloon_model_V1(inputs):
     
     # Once the integration is done, reshape the data struct to an n x 6 where n is the number of time steps
     dat.pos_vel = dat.pos_vel.reshape((int(len(dat.pos_vel)/6), 6))
-
-    # Finally, send the full ephemeris data to function to create a balloon.e file for STK visualization
-    balloonEphemerisWriter(inputs.launch_date, dat.pos_vel, dat.time, 'balloon','Fixed')
 
     # Return data object structure for reference in main code
     return dat
