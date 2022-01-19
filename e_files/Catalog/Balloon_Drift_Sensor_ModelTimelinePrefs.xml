@@ -1,0 +1,13 @@
+<?xml version = "1.0" standalone = "yes"?>
+<TimelineLine_Prefs STK_version = "11.4.0">
+    <Views Type = "Content">
+        <ContentView Name = "Scenario Availability">
+            <Row ClassName = "Scenario" ComponentName = "AvailabilityIntervals" DisplayName = "Balloon_Drift_Sensor_Model AvailabilityIntervals" IsDefaultName = "True" IsExpanded = "False" IsGroup = "False" IsHidden = "False" Path = "/Application/STK/Scenario/Balloon_Drift_Sensor_Model" Type = "IntervalList">
+                <Interval Name = "Balloon_Drift_Sensor_Model AvailabilityIntervals" StartTime = "20 Jan 2020 17:00:00.000" StopTime = "20 Jan 2020 19:00:00.000" />
+            </Row>
+        </ContentView>
+    </Views>
+    <Views Type = "Time">
+        <TimeView FullViewRulerStartTime = "0.000000" FullViewRulerStopTime = "0.000000" GlobalIntervalComp = "AnalysisInterval" GlobalIntervalCompPath = "/Application/STK/Scenario/Balloon_Drift_Sensor_Model" GlobalStartOffset = "0.000000" GlobalStartTime = "20 Jan 2020 17:00:00.000" GlobalStopOffset = "0.000000" GlobalStopTime = "20 Jan 2020 19:00:00.000" MaxFullViewTime = "0.000000" MinFullViewTime = "0.000000" Name = "Scenario Analysis Period" ViewportStartTime = "0.000000" ViewportStopTime = "0.000000" />
+    </Views>
+</TimelineLine_Prefs>
