@@ -82,7 +82,7 @@ def get_earthgram_data(_balloon_state,_gram_grid):
     trigger = 0
     for i in range(len(output_txt)):        # find starting line to read data based on pattern in EarthGRAM output
         if "------" in output_txt[i]:
-            start_line = i + 1
+            start_line = i + 3
             trigger = 0
             break
         else:
