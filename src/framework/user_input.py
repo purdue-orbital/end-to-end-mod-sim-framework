@@ -38,7 +38,7 @@ def user_input_terminal():
     # Mode = 1: Single balloon run
     # Mode = 2: Multiple balloon runs spread out through the year
     mode = 1
-    earthgram_alt_interval_m = 1000
+    earthgram_alt_interval_m = 500
 
     # Initial time
     init_time = '1 Jan 2022 12:00:00.000000'

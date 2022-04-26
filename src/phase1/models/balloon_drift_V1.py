@@ -75,15 +75,15 @@ def call_earthgram_func(current_point_local, current_vel, current_time):
     # grid = earthgram_points(current_point)
     
     _gram_grid = GramGrid([], [], [])
-    for i in range(6):
+    for i in range(50):
         _geocentric_astropy_obj = earth.EarthLocation.from_geocentric(current_point[0],current_point[1],current_point[2],unit='meter')
         temp = _geocentric_astropy_obj.geodetic
         _gram_grid.long.append(temp.lon.value)
         _gram_grid.lat.append(temp.lat.value)
         if temp.height.value < 0:
-            _gram_grid.alt.append((0 + i*100)/1000)
+            _gram_grid.alt.append((0 + i*10)/1000)
         else:
-            _gram_grid.alt.append((temp.height.value + i*100)/1000)
+            _gram_grid.alt.append((temp.height.value + i*10)/1000)
 
     _grid_out = get_earthgram_data(_balloon_state, _gram_grid)
     
@@ -218,11 +218,12 @@ def balloon_model_V1(inputs):
             closest_earth_gram_data = earth_gram_data_list[0]
             out_of_bounds = 0
 
-        # Iterate through list of grid objects where each object contains data at a point
-        for gram_data_obj in earth_gram_data_list:
-            pass            
-            #TODO: Build method to determine which point to use in earthgram data grid
-        
+        # Find closest earthgram data point
+        #TODO: Build a better method to determine which point to use in earthgram data grid
+        alt_fraction = (integration_obj.y[2] - last_alt)/earthgram_alt_interval_m
+        gram_interval = int(np.floor(alt_fraction * len(earth_gram_data_list)))
+        closest_earth_gram_data = earth_gram_data_list[gram_interval]
+
         # At each time step, store the current state and time and append to ephemeris data struct
         dat.pos_vel = np.append(dat.pos_vel, integration_obj.y)
         dat.time = np.append(dat.time, integration_obj.t)
