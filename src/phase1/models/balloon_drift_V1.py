@@ -11,20 +11,20 @@ import sys
 
 
 def enu2xyz(enu_position):
-  """
-  Convert east, north, up coordinates (labeled e, n, u) to ECEF coordinates.
-  The reference point (phi, lambda, h) must be given. All distances are in metres
-  """
- 
-  origin_ecef =  cape_cart_m  # Location of Cape Canaveral in ECEF meters
-  [refLat, refLong] =  cape_lla_deg[0:2]
-  [e, n, u] = enu_position
- 
-  X = -np.sin(refLong)*e - np.cos(refLong)*np.sin(refLat)*n + np.cos(refLong)*np.cos(refLat)*u + origin_ecef[0]
-  Y = np.cos(refLong)*e - np.sin(refLong)*np.sin(refLat)*n + np.cos(refLat)*np.sin(refLong)*u + origin_ecef[1]
-  Z = np.cos(refLat)*n + np.sin(refLat)*u + origin_ecef[2]
-  
-  return [X, Y, Z]
+    """
+    Convert east, north, up coordinates (labeled e, n, u) to ECEF coordinates.
+    The reference point (phi, lambda, h) must be given. All distances are in metres
+    """
+    
+    origin_ecef =  cape_cart_m  # Location of Cape Canaveral in ECEF meters
+    [refLat, refLong] =  cape_lla_deg[0:2]
+    [e, n, u] = enu_position
+    
+    X = -np.sin(refLong)*e - np.cos(refLong)*np.sin(refLat)*n + np.cos(refLong)*np.cos(refLat)*u + origin_ecef[0]
+    Y = np.cos(refLong)*e - np.sin(refLong)*np.sin(refLat)*n + np.cos(refLat)*np.sin(refLong)*u + origin_ecef[1]
+    Z = np.cos(refLat)*n + np.sin(refLat)*u + origin_ecef[2]
+    
+    return [X, Y, Z]
 
 
 def earthgram_points(current_point):
@@ -95,6 +95,8 @@ def balloon_force_models(balloon_vel, wind_vel, atm_density):
     Function to define and calculate
     forces acting on balloon system
     """
+    #TODO - Fix directionality of wind velocity
+
     # Calculate wind velocities relative to the balloon
     rel_vel_x = balloon_vel[0] - wind_vel[0]
     rel_vel_y = balloon_vel[1] - wind_vel[1]
@@ -167,7 +169,7 @@ def balloon_model_V1(inputs):
 
     # Define global variables
     global mass, coeff_drag, balloon_cross_area, balloon_volume, launch_time, cape_cart_m, cape_lla_deg, EARTH_RADIUS
-    mass, coeff_drag, balloon_cross_area, balloon_volume, launch_time, cape_cart_m, cape_lla_deg = inputs.constants
+    mass, coeff_drag, balloon_cross_area, balloon_volume, launch_time, cape_cart_m, cape_lla_deg, earthgram_alt_interval_m = inputs.constants
     EARTH_RADIUS = 6373.455 * 1000
 
     # Initialize an instance of the data class to store data
@@ -202,7 +204,7 @@ def balloon_model_V1(inputs):
         integration_obj.step()
         
         # Determine if our current location is still within or close enough to data grid, if not, get new data
-        if abs(integration_obj.y[2] - last_alt) > 100:
+        if abs(integration_obj.y[2] - last_alt) > earthgram_alt_interval_m:
             #TODO: Build function to check if balloon is outside of earthgram data grid
             out_of_bounds = 1
             last_alt = integration_obj.y[2]
@@ -215,7 +217,7 @@ def balloon_model_V1(inputs):
             earth_gram_data_list = call_earthgram_func(current_point, current_vel, current_time)
             closest_earth_gram_data = earth_gram_data_list[0]
             out_of_bounds = 0
-        
+
         # Iterate through list of grid objects where each object contains data at a point
         for gram_data_obj in earth_gram_data_list:
             pass            

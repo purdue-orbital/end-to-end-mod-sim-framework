@@ -79,8 +79,9 @@ def get_earthgram_data(_balloon_state,_gram_grid):
 
     temporary_var = []  # temporary variable for data storage in for loop
 
+    trigger = 0
     for i in range(len(output_txt)):        # find starting line to read data based on pattern in EarthGRAM output
-        if "traj_file.txt" in output_txt[i]:
+        if "------" in output_txt[i]:
             start_line = i + 1
             trigger = 0
             break

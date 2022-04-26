@@ -30,31 +30,42 @@ def user_input_gui():
 
 
 def user_input_terminal():
-    
+    """
+    This function contains all important user inputs to be configured prior to running
+    """
+
     # Select the run mode
     # Mode = 1: Single balloon run
     # Mode = 2: Multiple balloon runs spread out through the year
-    mode = 2
-    
+    mode = 1
+    earthgram_alt_interval_m = 1000
+
     # Initial time
-    init_time = '15 May 2023 12:00:00.000000'
+    init_time = '1 Jan 2022 12:00:00.000000'
     launch_time = datetime2STK.UTCG2datetime(init_time)
-    
+    launch_altitude = 25000.0
+
     # Lat/Long/Alt of Cape Canaveral
-    cape_lla_deg = [28.3922, -80.6077, 0]
+    cape_lla_deg = [0, 0, 0]
     # Cartesian Position for Cape Canaveral (from STK)
     cape_cart_km = [916.357, -5539.88, 3014.8]
     cape_cart_m = [i * 1000 for i in cape_cart_km]
+    launch_location_type = 'Cartesian'
+    # Set initial velocity to assume 1 m/s in z direction (upwards)
+    init_vel = [0, 0, 1]
 
-    # Constant values [mass [kg], coefficient of drag, cross-sectional balloon area [m^2], balloon volume [m^3], time of launch, location of launch]
-    # From google drive, prelim Raven specs say diameter of 61.5 ft for 205 lb system (160 lb payload, 45 lb balloon)
+    # Constant values [mass [kg], coefficient of drag, cross-sectional balloon area [m^2],
+    #  balloon volume [m^3], time of launch, location of launch]
+    # From google drive, prelim Raven specs say diameter of 61.5 ft for 205 lb system
+    # (160 lb payload, 45 lb balloon)
     radius = 9.3845 # meters
     area = np.square(radius)*np.pi
     volume = 4/3*np.pi*np.power(radius,3)
-    constants = [93, 0.5, area, volume, launch_time, cape_cart_m, cape_lla_deg]
+    payload_mass = 10
+    constants = [payload_mass, 0.5, area, volume, launch_time, cape_cart_m, cape_lla_deg, earthgram_alt_interval_m]
 
     # Fake Data to test inputs
-    inputs = InputStructure(25000.0, [0, 0, 0], 'Cartesian', launch_time, 3600, mode, 'historical', constants)
+    inputs = InputStructure(launch_altitude, [0, 0, 0], launch_location_type, launch_time, 3600, mode, 'historical', constants)
 
     # If inputs are Cartesian then directly translate
     if inputs.launch_location_type == 'Cartesian':
@@ -63,9 +74,6 @@ def user_input_terminal():
     # If inputs are Lat-Long-Alt then use the coordinate transition method
     if inputs.launch_location_type == 'Lat-Long-Alt':
         inputs.launch_location_cart = inputs.lla_to_cartesian()
-    
-    # Set initial velocity to assume zero in all directions
-    init_vel = [0, 0, 1]
 
     # append position and velocity vectors to create initial state vector
     inputs.launch_init_state = inputs.launch_location_cart + init_vel
@@ -87,11 +95,14 @@ class InputStructure:
     launch_location_cart: ty.Optional[ty.List[float]] = None
     launch_init_state: ty.Optional[ty.List[float]] = None
 
-    def lla_to_cartesian(self):     
+    def lla_to_cartesian(self):
+        """
+        Conversion function for lat-long-alt state to x-y-z ecef state
+        """
         latitude, longitude = np.deg2rad(self.launch_location_lla[0:2])
         altitude = self.launch_location_lla[2]
         cart = []
-        R = 6378137.0 + altitude  # relative to centre of the earth     
+        R = 6378137.0 + altitude  # relative to centre of the earth
         cart.append(R * math.cos(longitude) * math.cos(latitude))
         cart.append(R * math.sin(longitude) * math.cos(latitude))
         cart.append(R * math.sin(latitude))
