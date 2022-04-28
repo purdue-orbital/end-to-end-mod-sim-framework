@@ -37,7 +37,7 @@ def single_run_launch_platform_3dof(inputs):
     balloon_data_out = balloon_model_V1(inputs)
 
     # Set the final time step values from balloon model as the "current state"
-    transition_data.current_pos_vel = balloon_data_out.pos_vel[-1][0:6]
+    transition_data.current_pos_vel = balloon_data_out.output_ephem[-1][0:6]
     transition_data.current_time = balloon_data_out.time[-1]
 
     # If we make it to this point, seems like model ran successfully
@@ -155,12 +155,13 @@ if __name__ == "__main__":
         # Assign the returned data from function to data structs
         final_balloon_data, balloon_ephemeris = single_run_launch_platform_3dof(inputs)
         # Finally, send the full ephemeris data to function to create a balloon.e file for STK visualization
-        balloonEphemerisWriter(inputs.launch_date, balloon_ephemeris.pos_vel, balloon_ephemeris.time, 'balloon','Custom TopoCentric Facility/Launch')
+        balloonEphemerisWriter(inputs.launch_date, balloon_ephemeris.output_ephem, balloon_ephemeris.time, 'balloon','ICEF')
         # If run failed, alert user
         if final_balloon_data.model_run_status == 'Failed':
             print('Run failed!')
         # If run was successful, provide relevant information to user
         elif final_balloon_data.model_run_status == 'Success':
+            """
             print("\nRun succeeded!")
             print("\nAfter {} mins balloon is:".format(final_balloon_data.current_time/60))
             print("x-position = {} km".format(final_balloon_data.current_pos_vel[0]/1000))
@@ -169,6 +170,7 @@ if __name__ == "__main__":
             print("x-velocity = {} m/s".format(final_balloon_data.current_pos_vel[3]))
             print("y-velocity = {} m/s".format(final_balloon_data.current_pos_vel[4]))
             print("z-velocity = {} m/s".format(final_balloon_data.current_pos_vel[5]))
+            """
 
     elif inputs.mode == 2:
         # Run sequence of runs

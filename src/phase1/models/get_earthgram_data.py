@@ -1,4 +1,5 @@
 import datetime
+import sys
 import os
 from dataclasses import dataclass
 import typing as ty
@@ -59,44 +60,50 @@ def get_earthgram_data(_balloon_state,_gram_grid):
 
 ## initialization ##
 
-    elapsed_time = []       # elapsed seconds since initial balloon state based on current altitude and vz
+    elapsed_time = [] # elapsed seconds since initial balloon state based on current altitude and vz
 
     for x in _gram_grid.alt:
-        elapsed_time.append((x - _balloon_state.alt)*1000/_balloon_state.vert_speed)
-    
+        if _balloon_state.alt < 0:
+            _balloon_state.alt = 0
+        elapsed_time.append((x*1000 - _balloon_state.alt)/_balloon_state.vert_speed)
+
     with open('earthgram/traj_file.txt','w') as f:    # open text file
         f.writelines('')                    # clear file content
-        for i in range(len(_gram_grid.alt)):     # write trajectory file in format accepted by EarthGRAM
-            f.write("{}\t{}\t{}\t{}\n".format(elapsed_time[i],_gram_grid.alt[i],_gram_grid.lat[i],_gram_grid.long[i]))
+        for i in range(len(_gram_grid.alt)): # write trajectory file in format accepted by EarthGRAM
+            f.write("{}\t{}\t{}\t{}\n".format(
+                elapsed_time[i],_gram_grid.alt[i],_gram_grid.lat[i],_gram_grid.long[i]))
 
 ## Run EarthGRAM.exe to generate atmospheric data
 
     RunningGram()
 
 ## output formatting ##
-    with open('earthgram/output.txt', newline = '') as f:     # open and read EarthGRAM output file
-	    output_txt = f.readlines()
+    with open('earthgram/output.txt', newline = '') as f:   # open and read EarthGRAM output file
+        output_txt = f.readlines()
 
-    temporary_var = []  # temporary variable for data storage in for loop
+    # os.remove('earthgram/output.txt')
 
-    trigger = 0
-    for i in range(len(output_txt)):        # find starting line to read data based on pattern in EarthGRAM output
-        if "------" in output_txt[i]:
-            start_line = i + 3
-            trigger = 0
-            break
-        else:
-            start_line = 21     # might want to make this backup more robust
-            trigger = 1
-    
-    if trigger == 1:
-        print("Warning: get_earthgram_data had to default to select the default output start line.\n")
+    start_line = 0
+    for i in range(len(output_txt)):
+        if "-------" in output_txt[i]:
+            if "Position" in output_txt[i+1]:
+                start_line = i + 3
+                break
+            elif "Ruv" in output_txt[i+1]:
+                continue
+            else:
+                start_line = i + 1
+                break
+
+    if start_line == 0:
+        print("Issue with Output.txt Formatting")
+        sys.exit()
 
     grid_out_list = []  # initialize output data list
 
     for i in range(len(_gram_grid.alt)):         # store desired output data
         temporary_var = output_txt[start_line + 13*i].split()   # pull data from correct output text file lines
-        
+  
         floats = []
         for val in temporary_var[0:9]:
             floats.append(float(val))   # convert strings to floats
